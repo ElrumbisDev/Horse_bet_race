@@ -10,6 +10,10 @@ type Course = {
   name: string
   date: string
   slots: number
+  slotsArray?: Slot[]
+  horses?: Horse[]
+  finished?: boolean
+  winner?: string
 }
 
 type WinnerSelectionProps = {
