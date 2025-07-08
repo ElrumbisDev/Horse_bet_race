@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 
+type Slot = { id: number; taken: boolean }
+type Horse = { id: string; name: string; userName?: string }
+
 type Course = {
   _id: string
   name: string
