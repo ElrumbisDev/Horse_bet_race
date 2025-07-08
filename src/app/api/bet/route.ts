@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const db = client.db('cheval-bet')
     const betsCollection = db.collection('bets')
 
-    let query: any = { userId }
+    const query: { userId: string; finished?: { $ne: boolean } } = { userId }
     
     if (!includeFinished) {
       // Par défaut, ne retourner que les paris en cours (non terminés)

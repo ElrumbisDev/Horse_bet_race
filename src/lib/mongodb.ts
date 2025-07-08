@@ -19,11 +19,11 @@ if (!uri) {
 
 if (process.env.NODE_ENV === 'development') {
   // Evite plusieurs connexions en dev (hot reload)
-  if (!(global as any)._mongoClientPromise) {
+  if (!(global as unknown as { _mongoClientPromise?: Promise<MongoClient> })._mongoClientPromise) {
     client = new MongoClient(uri, options)
-    ;(global as any)._mongoClientPromise = client.connect()
+    ;(global as unknown as { _mongoClientPromise: Promise<MongoClient> })._mongoClientPromise = client.connect()
   }
-  clientPromise = (global as any)._mongoClientPromise
+  clientPromise = (global as unknown as { _mongoClientPromise: Promise<MongoClient> })._mongoClientPromise
 } else {
   // En prod, nouvelle connexion normale
   client = new MongoClient(uri, options)

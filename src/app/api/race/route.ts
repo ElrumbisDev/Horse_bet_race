@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
     
     if (nextRace) {
       // Convert slotsArray to slots format expected by main page
-      const slots = (nextRace.slotsArray || []).map((slot: any) => ({
+      const slots = (nextRace.slotsArray || []).map((slot: { slotNumber: number; taken: boolean }) => ({
         id: slot.slotNumber,
         taken: slot.taken
       }))
       
       // Convert horses to format expected by main page
-      const horses = (nextRace.horses || []).map((horse: any, index: number) => ({
+      const horses = (nextRace.horses || []).map((horse: { name: string }, index: number) => ({
         id: horse.name + index, // Generate unique id
         name: horse.name
       }))
@@ -106,7 +106,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ message: 'raceId manquant' }, { status: 400 })
     }
 
-    const updateFields: any = {}
+    const updateFields: { name?: string; date?: Date; slots?: number; slotsArray?: Array<{ slotNumber: number; taken: boolean; horseName: string | null }> } = {}
     if (name) updateFields.name = name
     if (date) updateFields.date = new Date(date)
     if (slots) {
@@ -147,7 +147,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Vérifier si l'utilisateur a déjà inscrit un cheval dans cette course
-    const existingHorse = race.horses?.find((horse: any) => horse.userId === userId)
+    const existingHorse = race.horses?.find((horse: { userId: string; name: string }) => horse.userId === userId)
     if (existingHorse) {
       return NextResponse.json({ message: 'Vous avez déjà inscrit un cheval dans cette course' }, { status: 400 })
     }
@@ -170,7 +170,7 @@ export async function PATCH(request: NextRequest) {
     
     if (slotNumber) {
       // Specific slot requested
-      targetSlotIndex = race.slotsArray.findIndex((slot: any) => slot.slotNumber === slotNumber)
+      targetSlotIndex = race.slotsArray.findIndex((slot: { slotNumber: number; taken: boolean }) => slot.slotNumber === slotNumber)
       if (targetSlotIndex === -1) {
         return NextResponse.json({ message: 'Slot non trouvé' }, { status: 400 })
       }
@@ -179,7 +179,7 @@ export async function PATCH(request: NextRequest) {
       }
     } else {
       // Find first available slot
-      targetSlotIndex = race.slotsArray.findIndex((slot: any) => !slot.taken)
+      targetSlotIndex = race.slotsArray.findIndex((slot: { taken: boolean }) => !slot.taken)
       if (targetSlotIndex === -1) {
         return NextResponse.json({ message: 'Plus de slots disponibles' }, { status: 400 })
       }
@@ -212,13 +212,13 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Convert slotsArray to slots format expected by main page
-    const slots = (updatedRace.slotsArray || []).map((slot: any) => ({
+    const slots = (updatedRace.slotsArray || []).map((slot: { slotNumber: number; taken: boolean }) => ({
       id: slot.slotNumber,
       taken: slot.taken
     }))
     
     // Convert horses to format expected by main page
-    const formattedHorses = (updatedRace.horses || []).map((horse: any, index: number) => ({
+    const formattedHorses = (updatedRace.horses || []).map((horse: { name: string }, index: number) => ({
       id: horse.name + index, // Generate unique id
       name: horse.name
     }))

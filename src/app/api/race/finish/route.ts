@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Vérifier que le cheval gagnant existe dans la course
-    const winnerExists = race.horses?.some((horse: any) => horse.name === winnerHorseName)
+    const winnerExists = race.horses?.some((horse: { name: string; userName?: string }) => horse.name === winnerHorseName)
     if (!winnerExists) {
       return NextResponse.json({ message: 'Ce cheval n\'est pas inscrit dans cette course' }, { status: 400 })
     }
@@ -70,8 +70,6 @@ export async function POST(request: NextRequest) {
     )
 
     // Marquer tous les paris de cette course comme terminés
-    const winningBetIds = winningBets.map(bet => bet._id.toString())
-    
     await db.collection('bets').updateMany(
       { raceId },
       { 

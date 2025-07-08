@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUser, SignedIn, SignedOut, SignIn } from '@clerk/nextjs'
 
 type Slot = { id: number; taken: boolean }
@@ -17,7 +17,7 @@ export default function HomePage() {
   const [nextRace, setNextRace] = useState<Race | null>(null)
   const [slots, setSlots] = useState<Slot[]>([])
   const [registeredHorses, setRegisteredHorses] = useState<Horse[]>([])
-  const [userBets, setUserBets] = useState<any[]>([])
+  const [userBets, setUserBets] = useState<Array<{ amount: number; horseName: string; raceId: string }>>([])
 
   // Form states
   const [horseName, setHorseName] = useState('')
@@ -26,7 +26,7 @@ export default function HomePage() {
   const [selectedSlot, setSelectedSlot] = useState<number | null>(null)
 
   // Fonction fetchData extraite pour réutilisation
-  async function fetchData() {
+  const fetchData = useCallback(async () => {
     if (!user) return
     try {
       const resUser = await fetch('/api/user')
@@ -45,11 +45,11 @@ export default function HomePage() {
     } catch (error) {
       console.error('Erreur chargement données:', error)
     }
-  }
+  }, [user])
 
   useEffect(() => {
     fetchData()
-  }, [user])
+  }, [user, fetchData])
 
   function handleSlotSelect(id: number) {
     if (slots.find(s => s.id === id)?.taken) return

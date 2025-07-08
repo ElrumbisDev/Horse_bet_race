@@ -11,7 +11,7 @@ type Course = {
 
 type WinnerSelectionProps = {
   courseId: string
-  horses: any[]
+  horses: Horse[]
   onSelect: (courseId: string, winnerName: string) => void
   onCancel: () => void
 }
@@ -48,7 +48,7 @@ export default function AdminPage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(false)
   const [form, setForm] = useState({ name: '', date: '', slots: 0, _id: '' })
-  const [showWinnerSelection, setShowWinnerSelection] = useState<{courseId: string, horses: any[]} | null>(null)
+  const [showWinnerSelection, setShowWinnerSelection] = useState<{courseId: string, horses: Horse[]} | null>(null)
 
   // Charger les courses depuis l'API
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function AdminPage() {
   }
 
   // Terminer une course avec un cheval gagnant
-  function handleFinishRace(courseId: string, horses: any[]) {
+  function handleFinishRace(courseId: string, horses: Horse[]) {
     if (horses.length === 0) {
       alert('Aucun cheval inscrit dans cette course')
       return
@@ -158,7 +158,7 @@ export default function AdminPage() {
         <>
           <ul className="mb-8">
             {courses.map(course => {
-              const takenSlots = course.slotsArray ? course.slotsArray.filter((slot: any) => slot.taken).length : 0
+              const takenSlots = course.slotsArray ? course.slotsArray.filter((slot: Slot) => slot.taken).length : 0
               const isFull = takenSlots >= course.slots
               const horses = course.horses || []
               const isFinished = course.finished
@@ -197,7 +197,7 @@ export default function AdminPage() {
                       </div>
                       {horses.length > 0 && (
                         <div className="text-sm text-gray-700">
-                          <strong>Chevaux inscrits:</strong> {horses.map((horse: any) => 
+                          <strong>Chevaux inscrits:</strong> {horses.map((horse: Horse) => 
                             `${horse.name} (${horse.userName || 'Utilisateur'})`
                           ).join(', ')}
                         </div>
