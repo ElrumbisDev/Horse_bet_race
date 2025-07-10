@@ -34,7 +34,16 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
+        <header className="flex justify-between items-center p-4 gap-4 h-20 bg-white text-black shadow">
+          {/* Logo cliquable */}
+          <div>
+            <a href="/">
+              <img src="/logo.png" alt="Logo" className="h-30 w-auto hover:opacity-80 transition" />
+            </a>
+          </div>
+
+          {/* Authentification */}
+          <div className="flex items-center gap-4">
             <SignedOut>
               <SignInButton />
               <SignUpButton>
@@ -46,7 +55,8 @@ export default function RootLayout({
             <SignedIn>
               <UserButton />
             </SignedIn>
-          </header>
+          </div>
+        </header>
           {children}
         </body>
       </html>
