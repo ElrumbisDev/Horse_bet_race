@@ -5,7 +5,7 @@ import getClientPromise from '@/lib/mongodb'
 export async function GET() {
   try {
     const { userId } = await auth()
-    
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -25,22 +25,27 @@ export async function GET() {
     const enrichedBets = await Promise.all(
       userBets.map(async (bet) => {
         const race = await racesCollection.findOne({ _id: bet.raceId })
-        
+
         // Calculer la cote (nombre de chevaux inscrits)
         const cote = race?.horses?.length || 1
-        
-        // Calculer les gains potentiels ou réels
-        let gains = 0
-        if (bet.finished && bet.won) {
-          gains = bet.amount * cote
-        }
+
+        // Vérifier que les propriétés existent
+        const finished = bet.finished ?? false
+        const won = bet.won ?? false
+        const amount = bet.amount ?? 0
+
+        // Calculer les gains
+        const gains = finished && won ? amount * cote : 0
 
         return {
           ...bet,
           raceName: race?.name || `Course ${bet.raceId}`,
           cote,
           gains,
-          status: bet.finished ? (bet.won ? 'gagne' : 'perdu') : 'en_cours'
+          status: finished ? (won ? 'gagne' : 'perdu') : 'en_cours',
+          finished, // important si tu veux l'exploiter plus tard
+          won,
+          amount,
         }
       })
     )
@@ -48,16 +53,16 @@ export async function GET() {
     // Calculer les statistiques
     const stats = {
       total: enrichedBets.length,
-      enCours: enrichedBets.filter(bet => !bet.finished).length,
-      gagnes: enrichedBets.filter(bet => bet.finished && bet.won).length,
-      perdus: enrichedBets.filter(bet => bet.finished && !bet.won).length,
-      totalMise: enrichedBets.reduce((sum, bet) => sum + bet.amount, 0),
-      totalGains: enrichedBets.reduce((sum, bet) => sum + (bet.gains || 0), 0)
+      enCours: enrichedBets.filter((bet) => !bet.finished).length,
+      gagnes: enrichedBets.filter((bet) => bet.finished && bet.won).length,
+      perdus: enrichedBets.filter((bet) => bet.finished && !bet.won).length,
+      totalMise: enrichedBets.reduce((sum, bet) => sum + (bet.amount ?? 0), 0),
+      totalGains: enrichedBets.reduce((sum, bet) => sum + (bet.gains ?? 0), 0),
     }
 
     return NextResponse.json({
       bets: enrichedBets,
-      stats
+      stats,
     })
   } catch (error) {
     console.error('GET /api/historique error:', error)
