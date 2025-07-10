@@ -82,7 +82,7 @@ export default function HomePage() {
               <div className="card card-gradient hover:scale-105 transition-all duration-300 h-full">
                 <div className="text-center">
                   <div className="text-4xl mb-4">🎯</div>
-                  <h3 className="text-xl font-bold text-yellow-300 mb-3">Dashboard</h3>
+                  <h3 className="text-xl font-bold text-yellow-300 mb-3">Parier</h3>
                   <p className="text-yellow-100 mb-4">
                     Pariez sur vos chevaux favoris et inscrivez vos propres chevaux dans les courses.
                   </p>

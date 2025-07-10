@@ -17,7 +17,6 @@ export default function DashboardPage() {
   const [userPoints, setUserPoints] = useState(0)
   const [upcomingRaces, setUpcomingRaces] = useState<Race[]>([])
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
-  const [nextRace, setNextRace] = useState<Race | null>(null)
   const [slots, setSlots] = useState<Slot[]>([])
   const [registeredHorses, setRegisteredHorses] = useState<Horse[]>([])
   const [userBets, setUserBets] = useState<Array<{ amount: number; horseName: string; raceId: string; cote?: number; finished?: boolean; won?: boolean; winnings?: number }>>([])
@@ -78,7 +77,6 @@ export default function DashboardPage() {
 
       setUserPoints(userData.points)
       setUpcomingRaces(allRacesData.races || [])
-      setNextRace(nextRaceData.nextRace)
       setSlots(nextRaceData.slots)
       setRegisteredHorses(nextRaceData.horses)
       setUserBets(betsData)
@@ -94,7 +92,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, selectedRace])
 
   useEffect(() => {
     fetchData()
@@ -264,7 +262,7 @@ export default function DashboardPage() {
                 <div className={`text-lg font-bold ${
                   popupResult.won ? 'text-green-600' : 'text-red-600'
                 }`}>
-                  {popupResult.won ? `Vous avez gagné ${popupResult.winnings} points !` : 'Votre cheval n\'a pas gagné'}
+                  {popupResult.won ? `Vous avez gagné ${popupResult.winnings} points !` : 'Votre cheval n&apos;a pas gagné'}
                 </div>
               </div>
               <p className="text-sm text-gray-500 mb-6">

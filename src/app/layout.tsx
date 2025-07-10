@@ -1,10 +1,7 @@
 import { type Metadata, type Viewport } from 'next'
 import {
   ClerkProvider,
-  SignInButton,
-  SignUpButton,
   SignedIn,
-  SignedOut,
   UserButton,
 } from '@clerk/nextjs'
 import './globals.css'
@@ -47,8 +44,17 @@ export default function RootLayout({
                 </Link>
 
                 {/* Navigation */}
-                <nav className="hidden md:flex items-right justify-right space-x-6">
+                <nav className="hidden md:flex items-center space-x-6">
                   <SignedIn>
+                    <Link href="/dashboard" className="text-white hover:text-yellow-300 transition-colors font-medium">
+                      Dashboard
+                    </Link>
+                    <Link href="/historique" className="text-white hover:text-yellow-300 transition-colors font-medium">
+                      Historique
+                    </Link>
+                    <Link href="/scores" className="text-white hover:text-yellow-300 transition-colors font-medium">
+                      Leaderboard
+                    </Link>
                     <Link href="/admin" className="text-white hover:text-yellow-300 transition-colors font-medium">
                       Admin
                     </Link>
