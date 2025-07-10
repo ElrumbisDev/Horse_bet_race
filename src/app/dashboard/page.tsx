@@ -87,7 +87,7 @@ export default function DashboardPage() {
         setRegisteredHorses(firstRace.horses || [])
       } else if (selectedRace) {
         // Si une course est déjà sélectionnée, mettre à jour ses données
-        const updatedRace = allRacesData.races?.find(r => r.id === selectedRace.id)
+        const updatedRace = allRacesData.races?.find((r: Race) => r.id === selectedRace.id)
         if (updatedRace) {
           setSlots(updatedRace.slots || [])
           setRegisteredHorses(updatedRace.horses || [])
