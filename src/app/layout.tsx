@@ -9,6 +9,8 @@ import {
 } from '@clerk/nextjs'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
+import Link from 'next/link';
+import Image from 'next/image';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -37,9 +39,15 @@ export default function RootLayout({
         <header className="flex justify-between items-center p-4 gap-4 h-20 bg-white text-black shadow">
           {/* Logo cliquable */}
           <div>
-            <a href="/">
-              <img src="/logo.png" alt="Logo" className="h-30 w-auto hover:opacity-80 transition" />
-            </a>
+          <Link href="/">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={120}   // ajuste selon ta taille
+              height={40}   // ajuste selon ta taille
+              className="hover:opacity-80 transition"
+            />
+          </Link>
           </div>
 
           {/* Authentification */}

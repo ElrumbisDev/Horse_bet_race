@@ -132,7 +132,7 @@ export default function DashboardPage() {
       </SignedOut>
 
       <SignedIn>
-        <div className="justify-centered flex justify-between items-start mb-12">
+        <div className="flex justify-between items-start mb-12">
           <h1 className="text-2xl font-extrabold drop-shadow-lg">
             Bienvenue, {user?.firstName || user?.username || email?.split('@')[0] || 'Utilisateur'} !
           </h1>

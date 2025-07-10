@@ -11,7 +11,7 @@ export default function ReglesPage() {
             href="/" 
             className="bg-black bg-opacity-20 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium hover:bg-opacity-30 transition-all"
           >
-            ← Retour à l'accueil
+            ← Retour à l&apos;accueil
           </Link>
         </div>
         
