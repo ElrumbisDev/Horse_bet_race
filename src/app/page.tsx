@@ -2,36 +2,9 @@
 
 import Link from 'next/link'
 import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
-import { useState, useEffect } from 'react'
-
-type Player = {
-  id: string
-  name: string
-  points: number
-  position: number
-}
 
 export default function HomePage() {
   const { isSignedIn } = useUser()
-  const [topPlayers, setTopPlayers] = useState<Player[]>([])
-
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchTopPlayers()
-    }
-  }, [isSignedIn])
-
-  async function fetchTopPlayers() {
-    try {
-      const res = await fetch('/api/scores')
-      if (res.ok) {
-        const data = await res.json()
-        setTopPlayers(data.topPlayers)
-      }
-    } catch (error) {
-      console.error('Erreur récupération scores:', error)
-    }
-  }
 
   return (
     <div className="min-h-screen">
