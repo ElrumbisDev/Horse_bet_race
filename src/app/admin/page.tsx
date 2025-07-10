@@ -49,7 +49,7 @@ const formatUserName = (user: User) => {
 }
 
 export default function AdminPage() {
-  const { user } = useUser()
+  const { isSignedIn } = useUser()
   const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users'>('races')
   const [races, setRaces] = useState<Race[]>([])
   const [bets, setBets] = useState<Bet[]>([])
@@ -171,7 +171,7 @@ export default function AdminPage() {
               <div className="text-center">
                 <div className="text-4xl mb-4">🔐</div>
                 <p className="text-gray-600 mb-6">
-                  Connecte-toi pour accéder au panneau d'administration
+                  Connecte-toi pour accéder au panneau d&apos;administration
                 </p>
                 <Link href="/sign-in" className="btn btn-primary text-lg px-8 py-4">
                   Se connecter
@@ -187,7 +187,7 @@ export default function AdminPage() {
           {/* Header */}
           <div className="text-center mb-8 animate-fadeIn">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              🔧 Panneau d'Administration
+              🔧 Panneau d&apos;Administration
             </h1>
             <p className="text-gray-600 text-lg">
               Gestion des courses, paris et utilisateurs
@@ -490,7 +490,7 @@ export default function AdminPage() {
                             <th>Utilisateur</th>
                             <th>Email</th>
                             <th>Points</th>
-                            <th>Date d'inscription</th>
+                            <th>Date d&apos;inscription</th>
                             <th>Statut</th>
                           </tr>
                         </thead>
