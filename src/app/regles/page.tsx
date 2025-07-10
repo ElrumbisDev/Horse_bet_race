@@ -72,7 +72,7 @@ export default function ReglesPage() {
                   Les participants courent avec un <strong>bâton entre les jambes</strong>
                 </p>
                 <p className="text-gray-700">
-                  C'est la course la plus rapide et la plus folle ! Préparez-vous à galoper !
+                  C&apos;est la course la plus rapide et la plus folle ! Préparez-vous à galoper !
                 </p>
               </div>
 
@@ -97,11 +97,11 @@ export default function ReglesPage() {
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-red-600 font-bold">•</span>
-                      <span><strong>Disqualification</strong> si le bâton sort d'entre les jambes</span>
+                      <span><strong>Disqualification</strong> si le bâton sort d&apos;entre les jambes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-yellow-600 font-bold">•</span>
-                      <span>Droit de pousser ? <em>(À définir selon l'ambiance)</em></span>
+                      <span>Droit de pousser ? <em>(À définir selon l&apos;ambiance)</em></span>
                     </li>
                   </ul>
                 </div>
@@ -123,10 +123,10 @@ export default function ReglesPage() {
               <div className="bg-yellow-50 p-6 rounded-lg mb-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
                 <p className="text-gray-700 text-lg mb-4">
-                  Les participants forment des <strong>binômes</strong>. L'un joue le cheval (avec masque), l'autre le jockey sur son dos.
+                  Les participants forment des <strong>binômes</strong>. L&apos;un joue le cheval (avec masque), l&apos;autre le jockey sur son dos.
                 </p>
                 <p className="text-gray-700">
-                  Travail d'équipe et endurance sont les clés de la victoire !
+                  Travail d&apos;équipe et endurance sont les clés de la victoire !
                 </p>
               </div>
 
@@ -140,11 +140,11 @@ export default function ReglesPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 font-bold">•</span>
-                      <span>Le "cheval" porte le <strong>masque</strong></span>
+                      <span>Le &quot;cheval&quot; porte le <strong>masque</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-blue-600 font-bold">•</span>
-                      <span>Le "jockey" monte <strong>sur le dos</strong> du cheval</span>
+                      <span>Le &quot;jockey&quot; monte <strong>sur le dos</strong> du cheval</span>
                     </li>
                   </ul>
                 </div>
@@ -162,7 +162,7 @@ export default function ReglesPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-orange-600 font-bold">•</span>
-                      <span>Course d'<strong>endurance</strong> et de coordination</span>
+                      <span>Course d&apos;<strong>endurance</strong> et de coordination</span>
                     </li>
                   </ul>
                 </div>
@@ -193,7 +193,7 @@ export default function ReglesPage() {
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-purple-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-purple-800 mb-3">🎯 Rôles dans l'équipe</h4>
+                  <h4 className="font-bold text-purple-800 mb-3">🎯 Rôles dans l&apos;équipe</h4>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 font-bold">•</span>
@@ -211,11 +211,11 @@ export default function ReglesPage() {
                 </div>
 
                 <div className="bg-orange-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-orange-800 mb-3">⚡ Règle d'avancement</h4>
+                  <h4 className="font-bold text-orange-800 mb-3">⚡ Règle d&apos;avancement</h4>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-orange-600 font-bold">•</span>
-                      <span><strong>Tant que la balle n'est pas dans le seau</strong></span>
+                      <span><strong>Tant que la balle n&apos;est pas dans le seau</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-red-600 font-bold">•</span>
@@ -232,7 +232,7 @@ export default function ReglesPage() {
               <div className="bg-gray-50 p-4 rounded-lg mt-6">
                 <h4 className="font-bold text-gray-800 mb-3">🎬 Inspiration vidéo</h4>
                 <p className="text-gray-700 mb-3">
-                  Pour mieux comprendre l'esprit de cette course, regardez cette vidéo :
+                  Pour mieux comprendre l&apos;esprit de cette course, regardez cette vidéo :
                 </p>
                 <a 
                   href="https://www.youtube.com/watch?v=q2bCQQFIt-I" 
@@ -240,7 +240,7 @@ export default function ReglesPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
                 >
-                  🎥 Voir la vidéo d'inspiration
+                  🎥 Voir la vidéo d&apos;inspiration
                   <span>→</span>
                 </a>
                 <p className="text-gray-600 text-sm mt-2">
@@ -283,7 +283,7 @@ export default function ReglesPage() {
           {/* Retour */}
           <div className="text-center mt-12">
             <Link href="/" className="text-gray-600 hover:text-gray-800 font-medium">
-              ← Retour à l'accueil
+              ← Retour à l&apos;accueil
             </Link>
           </div>
         </div>
