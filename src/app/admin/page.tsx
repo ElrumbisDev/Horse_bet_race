@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
+import {SignedIn, SignedOut } from '@clerk/nextjs'
 import Link from 'next/link'
 
 type Race = {

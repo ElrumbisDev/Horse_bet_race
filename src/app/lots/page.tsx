@@ -123,12 +123,12 @@ export default function LotsPage() {
             </Link>
           ) : (
             <Link href="/sign-up" className="btn btn-primary text-lg px-8 py-4">
-              🚀 S'inscrire maintenant
+              🚀 S&apos;inscrire maintenant
             </Link>
           )}
           <div className="mt-4">
             <Link href="/" className="text-gray-600 hover:text-gray-800">
-              ← Retour à l'accueil
+              ← Retour à l&apos;accueil
             </Link>
           </div>
         </div>
