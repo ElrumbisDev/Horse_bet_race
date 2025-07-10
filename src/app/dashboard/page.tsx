@@ -77,15 +77,23 @@ export default function DashboardPage() {
 
       setUserPoints(userData.points)
       setUpcomingRaces(allRacesData.races || [])
-      setSlots(nextRaceData.slots)
-      setRegisteredHorses(nextRaceData.horses)
       setUserBets(betsData)
       setFinishedBets(finishedBetsData)
       setViewedRaces(viewedRacesData.viewedRaces || [])
       
       // Si pas de course sélectionnée, prendre la première disponible
       if (!selectedRace && allRacesData.races?.length > 0) {
-        setSelectedRace(allRacesData.races[0])
+        const firstRace = allRacesData.races[0]
+        setSelectedRace(firstRace)
+        setSlots(firstRace.slots || [])
+        setRegisteredHorses(firstRace.horses || [])
+      } else if (selectedRace) {
+        // Si une course est déjà sélectionnée, mettre à jour ses données
+        const updatedRace = allRacesData.races?.find(r => r.id === selectedRace.id)
+        if (updatedRace) {
+          setSlots(updatedRace.slots || [])
+          setRegisteredHorses(updatedRace.horses || [])
+        }
       }
     } catch (error) {
       console.error('Erreur chargement données:', error)

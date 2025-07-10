@@ -25,7 +25,30 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={{
+      locale: "fr-FR",
+      signIn: {
+        start: {
+          title: "Connexion à votre compte",
+          subtitle: "Bienvenue ! Connectez-vous pour continuer",
+          actionText: "Connexion",
+          actionLink: "Inscription"
+        }
+      },
+      signUp: {
+        start: {
+          title: "Créer votre compte",
+          subtitle: "Bienvenue ! Créez votre compte pour commencer",
+          actionText: "Inscription",
+          actionLink: "Connexion"
+        }
+      },
+      userButton: {
+        action__manageAccount: "Gérer le compte",
+        action__signOut: "Se déconnecter",
+        action__signOutAll: "Se déconnecter de tous les appareils"
+      }
+    }}>
       <html lang="fr">
         <body className="min-h-screen">
           {/* Header PMU */}

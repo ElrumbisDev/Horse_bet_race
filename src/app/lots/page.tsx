@@ -90,30 +90,6 @@ export default function LotsPage() {
           </div>
         </div>
 
-        {/* Règles des tirages */}
-        <div className="card bg-gray-100 p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            📋 Règles des tirages
-          </h2>
-          <div className="space-y-4 text-gray-700">
-            <div className="flex items-start gap-3">
-              <span className="text-green-600 font-bold">•</span>
-              <p>Les lots sont attribués selon les classements mensuels et hebdomadaires</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-green-600 font-bold">•</span>
-              <p>Seuls les joueurs actifs (minimum 5 paris par mois) sont éligibles</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-green-600 font-bold">•</span>
-              <p>Les gagnants sont contactés par email avec les instructions de récupération</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-green-600 font-bold">•</span>
-              <p>Les lots ne sont pas échangeables contre des points ou de l&apos;argent</p>
-            </div>
-          </div>
-        </div>
 
         {/* CTA */}
         <div className="text-center">
