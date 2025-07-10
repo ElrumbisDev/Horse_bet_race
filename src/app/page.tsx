@@ -1,10 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
+import { SignedIn, SignedOut } from '@clerk/nextjs'
 
 export default function HomePage() {
-  const { isSignedIn } = useUser()
 
   return (
     <div className="min-h-screen">
