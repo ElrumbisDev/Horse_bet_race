@@ -14,13 +14,10 @@ type Player = {
 export default function HomePage() {
   const { isSignedIn } = useUser()
   const [topPlayers, setTopPlayers] = useState<Player[]>([])
-  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (isSignedIn) {
       fetchTopPlayers()
-    } else {
-      setLoading(false)
     }
   }, [isSignedIn])
 
@@ -33,8 +30,6 @@ export default function HomePage() {
       }
     } catch (error) {
       console.error('Erreur récupération scores:', error)
-    } finally {
-      setLoading(false)
     }
   }
 

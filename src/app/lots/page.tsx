@@ -14,7 +14,7 @@ export default function LotsPage() {
             🎁 Tous les lots à gagner
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Découvrez tous les prix incroyables que vous pouvez remporter en jouant au PMU d'Artsonic
+            Découvrez tous les prix incroyables que vous pouvez remporter en jouant au PMU d&apos;Artsonic
           </p>
         </div>
 
@@ -25,7 +25,7 @@ export default function LotsPage() {
             <div className="text-6xl mb-4">🎫</div>
             <h3 className="font-bold text-2xl mb-3">Festival 61 Degrés</h3>
             <p className="text-gray-700 mb-4">
-              Vivez une expérience unique au festival 61 Degrés avec 2 places offertes pour profiter de la musique et de l'ambiance exceptionnelle !
+              Vivez une expérience unique au festival 61 Degrés avec 2 places offertes pour profiter de la musique et de l&apos;ambiance exceptionnelle !
             </p>
             <div className="text-3xl font-bold text-yellow-600 mb-4">2 places</div>
             <div className="text-sm text-gray-600">
@@ -38,7 +38,7 @@ export default function LotsPage() {
             <div className="text-6xl mb-4">🎵</div>
             <h3 className="font-bold text-2xl mb-3">Accès Backstage Artsonic</h3>
             <p className="text-gray-700 mb-4">
-              Découvrez les coulisses d'Artsonic avec un pass VIP backstage exclusif. Rencontrez les artistes et vivez l'événement de l'intérieur !
+              Découvrez les coulisses d&apos;Artsonic avec un pass VIP backstage exclusif. Rencontrez les artistes et vivez l&apos;événement de l&apos;intérieur !
             </p>
             <div className="text-3xl font-bold text-blue-600 mb-4">VIP Pass</div>
             <div className="text-sm text-gray-600">
@@ -110,7 +110,7 @@ export default function LotsPage() {
             </div>
             <div className="flex items-start gap-3">
               <span className="text-green-600 font-bold">•</span>
-              <p>Les lots ne sont pas échangeables contre des points ou de l'argent</p>
+              <p>Les lots ne sont pas échangeables contre des points ou de l&apos;argent</p>
             </div>
           </div>
         </div>

@@ -94,7 +94,7 @@ export default function HistoriquePage() {
               <div className="text-center">
                 <div className="text-4xl mb-4">📊</div>
                 <p className="text-gray-600 mb-6">
-                  Connecte-toi pour voir l'historique de tes paris et tes statistiques
+                  Connecte-toi pour voir l&apos;historique de tes paris et tes statistiques
                 </p>
                 <Link href="/sign-in" className="btn btn-primary text-lg px-8 py-4">
                   Se connecter
@@ -121,7 +121,7 @@ export default function HistoriquePage() {
             <div className="text-center py-12">
               <div className="animate-pulse">
                 <div className="text-4xl mb-4">⏳</div>
-                <p className="text-gray-600">Chargement de l'historique...</p>
+                <p className="text-gray-600">Chargement de l&apos;historique...</p>
               </div>
             </div>
           ) : (

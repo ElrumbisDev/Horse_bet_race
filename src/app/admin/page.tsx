@@ -49,7 +49,6 @@ const formatUserName = (user: User) => {
 }
 
 export default function AdminPage() {
-  const { isSignedIn } = useUser()
   const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users'>('races')
   const [races, setRaces] = useState<Race[]>([])
   const [bets, setBets] = useState<Bet[]>([])

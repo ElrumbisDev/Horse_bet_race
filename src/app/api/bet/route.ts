@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { horseName, amount, raceId, cote } = body
+    const { horseName, amount, raceId } = body
 
     if (!horseName || typeof amount !== 'number' || !raceId) {
       return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 })

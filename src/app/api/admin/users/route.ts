@@ -25,7 +25,7 @@ export async function GET() {
     const enrichedUsers = await Promise.all(
       allUsers.map(async (user) => {
         let displayName = user.userId // Fallback par défaut
-        let userEmail = user.email || ''
+        const userEmail = user.email || ''
         
         // Pour l'instant, utilisons les données disponibles
         // TODO: Synchroniser les noms depuis Clerk côté client

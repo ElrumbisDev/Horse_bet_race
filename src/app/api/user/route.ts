@@ -34,7 +34,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { userId, email, name, firstName, username } = await request.json()
+  const { userId, email, firstName, username } = await request.json()
 
   if (!userId) {
     return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
