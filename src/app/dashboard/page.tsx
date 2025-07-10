@@ -20,8 +20,12 @@ export default function DashboardPage() {
   const [nextRace, setNextRace] = useState<Race | null>(null)
   const [slots, setSlots] = useState<Slot[]>([])
   const [registeredHorses, setRegisteredHorses] = useState<Horse[]>([])
-  const [userBets, setUserBets] = useState<Array<{ amount: number; horseName: string; raceId: string; cote?: number }>>([])
+  const [userBets, setUserBets] = useState<Array<{ amount: number; horseName: string; raceId: string; cote?: number; finished?: boolean; won?: boolean; winnings?: number }>>([])
+  const [finishedBets, setFinishedBets] = useState<Array<{ amount: number; horseName: string; raceId: string; cote?: number; finished?: boolean; won?: boolean; winnings?: number }>>([])
+  const [viewedRaces, setViewedRaces] = useState<string[]>([])
   const [showWelcomePopup, setShowWelcomePopup] = useState(false)
+  const [showResultPopup, setShowResultPopup] = useState(false)
+  const [popupResult, setPopupResult] = useState<{ amount: number; horseName: string; raceId: string; cote?: number; finished?: boolean; won?: boolean; winnings?: number } | null>(null)
   const filledSlots = slots.filter((slot) => slot !== null && slot !== undefined)
   const slotCount = filledSlots.length
 
@@ -54,18 +58,22 @@ export default function DashboardPage() {
         setShowWelcomePopup(true)
       }
 
-      const [resUser, resAllRaces, resNextRace, resBets] = await Promise.all([
+      const [resUser, resAllRaces, resNextRace, resBets, resFinishedBets, resViewedRaces] = await Promise.all([
         fetch('/api/user'),
         fetch('/api/race?all=true'),
         fetch('/api/race'),
-        fetch('/api/bet')
+        fetch('/api/bet'),
+        fetch('/api/bet?finished=true'),
+        fetch('/api/user/viewed-races')
       ])
 
-      const [userData, allRacesData, nextRaceData, betsData] = await Promise.all([
+      const [userData, allRacesData, nextRaceData, betsData, finishedBetsData, viewedRacesData] = await Promise.all([
         resUser.json(),
         resAllRaces.json(),
         resNextRace.json(),
-        resBets.json()
+        resBets.json(),
+        resFinishedBets.json(),
+        resViewedRaces.json()
       ])
 
       setUserPoints(userData.points)
@@ -74,6 +82,8 @@ export default function DashboardPage() {
       setSlots(nextRaceData.slots)
       setRegisteredHorses(nextRaceData.horses)
       setUserBets(betsData)
+      setFinishedBets(finishedBetsData)
+      setViewedRaces(viewedRacesData.viewedRaces || [])
       
       // Si pas de course sélectionnée, prendre la première disponible
       if (!selectedRace && allRacesData.races?.length > 0) {
@@ -84,7 +94,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [user])
+  }, [user, selectedRace])
 
   useEffect(() => {
     fetchData()
@@ -170,6 +180,36 @@ export default function DashboardPage() {
     }
   }
 
+  // Fonction pour gérer le clic sur "historique complet"
+  async function handleHistoriqueClick() {
+    // Calculer les nouvelles courses (non vues)
+    const newFinishedBets = finishedBets.filter(bet => !viewedRaces.includes(bet.raceId))
+    
+    if (newFinishedBets.length > 0) {
+      // Prendre le dernier pari terminé non vu
+      const latestUnviewedBet = newFinishedBets[newFinishedBets.length - 1]
+      setPopupResult(latestUnviewedBet)
+      setShowResultPopup(true)
+      
+      // Marquer cette course comme vue
+      try {
+        await fetch('/api/user/viewed-races', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ raceId: latestUnviewedBet.raceId })
+        })
+        
+        // Mettre à jour l'état local
+        setViewedRaces(prev => [...prev, latestUnviewedBet.raceId])
+      } catch (error) {
+        console.error('Erreur lors du marquage de la course comme vue:', error)
+      }
+    }
+    
+    // Rediriger vers l'historique (que la popup s'affiche ou non)
+    window.location.href = '/historique'
+  }
+
   const userName = user?.firstName || user?.username || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || 'Utilisateur'
 
   return (
@@ -197,6 +237,47 @@ export default function DashboardPage() {
                 className="btn btn-primary w-full"
               >
                 🏇 Commencer à jouer !
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Popup de résultat */}
+      {showResultPopup && popupResult && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 mx-4">
+            <div className="text-center">
+              <div className="text-6xl mb-4">
+                {popupResult.won ? '🏆' : '❌'}
+              </div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                {popupResult.won ? 'Félicitations !' : 'Course terminée'}
+              </h2>
+              <div className={`p-4 rounded-lg mb-4 ${
+                popupResult.won ? 'bg-green-50 border-2 border-green-300' : 'bg-red-50 border-2 border-red-300'
+              }`}>
+                <p className="font-bold text-lg mb-2">{popupResult.horseName}</p>
+                <p className="text-sm text-gray-600 mb-2">
+                  Votre mise: {popupResult.amount} points • Cote: {popupResult.cote || 1}x
+                </p>
+                <div className={`text-lg font-bold ${
+                  popupResult.won ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {popupResult.won ? `Vous avez gagné ${popupResult.winnings} points !` : 'Votre cheval n&apos;a pas gagné'}
+                </div>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">
+                {popupResult.won ? 'Vos gains ont été ajoutés à votre solde !' : 'Tentez votre chance sur la prochaine course !'}
+              </p>
+              <button
+                onClick={() => {
+                  setShowResultPopup(false)
+                  setPopupResult(null)
+                }}
+                className="btn btn-primary w-full"
+              >
+                Continuer
               </button>
             </div>
           </div>
@@ -292,7 +373,17 @@ export default function DashboardPage() {
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-2xl mb-2">📊</div>
+                  <div className="text-2xl mb-2 relative">
+                    📊
+                    {(() => {
+                      const newFinishedBets = finishedBets.filter(bet => !viewedRaces.includes(bet.raceId))
+                      return newFinishedBets.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                          {newFinishedBets.length}
+                        </span>
+                      )
+                    })()}
+                  </div>
                   <h3 className="font-bold text-white mb-1">Mes Paris</h3>
                   <p className="text-slate-300 text-sm">
                     {userBets.length} paris actifs
@@ -375,8 +466,49 @@ export default function DashboardPage() {
                   
                   {selectedRace && (
                   <>
-                  
-                  <form onSubmit={handleSubmitBet} className="space-y-6">
+                  {/* Vérifier si l'utilisateur a déjà parié sur cette course */}
+                  {(() => {
+                    const existingBet = userBets.find(bet => bet.raceId === selectedRace.id)
+                    if (existingBet) {
+                      return (
+                        <div className="text-center py-8">
+                          <div className="text-6xl mb-4">🐎</div>
+                          <h3 className="text-xl font-bold text-slate-800 mb-2">Course en attente...</h3>
+                          <div className="glass p-4 rounded-lg mb-4">
+                            <div className="space-y-2">
+                              <p className="text-sm">
+                                <span className="font-medium">Votre pari:</span> {existingBet.horseName}
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Heure de la course:</span> {' '}
+                                {new Date(selectedRace.date).toLocaleString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Cote:</span> {existingBet.cote || 1}x
+                              </p>
+                              <p className="text-sm">
+                                <span className="font-medium">Gains potentiels:</span> {' '}
+                                <span className="text-emerald-600 font-bold">
+                                  {Math.round((existingBet.cote || 1) * existingBet.amount * 10) / 10} pts
+                                </span>
+                              </p>
+                            </div>
+                          </div>
+                          <p className="text-slate-600 text-sm">
+                            Votre pari est confirmé ! Attendez les résultats de la course.
+                          </p>
+                        </div>
+                      )
+                    }
+                    
+                    // Si pas de pari existant, afficher le formulaire
+                    return (
+                      <form onSubmit={handleSubmitBet} className="space-y-6">
                     <div>
                       <label className="form-label">Montant à parier</label>
                       <input
@@ -442,6 +574,8 @@ export default function DashboardPage() {
                       )}
                     </button>
                   </form>
+                    )
+                  })()}
                   </>
                   )}
                 </div>
@@ -607,56 +741,124 @@ export default function DashboardPage() {
                     </button>
                   </div>
 
-                  {userBets.length === 0 ? (
-                    <div className="text-center py-8">
-                      <div className="text-4xl mb-4">🎯</div>
-                      <p className="text-slate-600">Aucun pari en cours</p>
-                      <button 
-                        onClick={() => setActiveSection('parier')}
-                        className="btn btn-primary mt-4"
-                      >
-                        Placer un pari
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {userBets.map((bet, index) => {
-                        const betCote = bet.cote || slotCount || 1;
-                        return (
-                          <div key={index} className="glass p-4 rounded-lg">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
-                              <div className="flex-1">
-                                <p className="font-medium text-base">{bet.horseName}</p>
-                                <p className="text-sm text-slate-600">
-                                  Mise: {bet.amount} pts • Cote: {betCote}x
-                                </p>
+                  <div className="space-y-6">
+                    {/* Dernière course terminée uniquement */}
+                    {finishedBets.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3">🏁 Dernière course terminée</h3>
+                        <div className="space-y-3">
+                          {(() => {
+                            // Prendre seulement le dernier pari terminé (le plus récent)
+                            const latestFinishedBet = finishedBets[finishedBets.length - 1];
+                            const betCote = latestFinishedBet.cote || 1;
+                            const won = latestFinishedBet.won || false;
+                            const winnings = latestFinishedBet.winnings || 0;
+                            return (
+                              <div className={`p-4 rounded-lg border-2 ${
+                                won ? 'border-green-300 bg-green-50' : 'border-red-300 bg-red-50'
+                              }`}>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-base flex items-center gap-2">
+                                      {won ? '🏆' : '❌'} {latestFinishedBet.horseName}
+                                    </p>
+                                    <p className="text-sm text-slate-600">
+                                      Mise: {latestFinishedBet.amount} pts • Cote: {betCote}x
+                                    </p>
+                                  </div>
+                                  <div className="text-left sm:text-right">
+                                    <div className={`text-sm font-bold ${
+                                      won ? 'text-green-600' : 'text-red-600'
+                                    }`}>
+                                      {won ? `+${winnings} pts` : 'Perdu'}
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-left sm:text-right">
-                                <div className="text-sm text-slate-500">En cours</div>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                      <div className="glass p-4 rounded-lg border-2 border-dashed border-slate-300">
-                        <div className="flex justify-between items-center text-sm">
-                          <span>Total parié:</span>
-                          <span className="font-bold">
-                            {userBets.reduce((sum, bet) => sum + bet.amount, 0)} points
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-sm mt-2">
-                          <span>Gains potentiels:</span>
-                          <span className="font-bold text-emerald-600">
-                            {Math.round(userBets.reduce((sum, bet) => {
-                              const betCote = bet.cote || slotCount || 1;
-                              return sum + bet.amount * betCote;
-                            }, 0) * 10) / 10} points
-                          </span>
+                            )
+                          })()}
                         </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+
+                    {/* Paris en cours */}
+                    {userBets.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-800 mb-3">⏳ Paris en cours</h3>
+                        <div className="space-y-3">
+                          {userBets.map((bet, index) => {
+                            const betCote = bet.cote || slotCount || 1;
+                            return (
+                              <div key={index} className="glass p-4 rounded-lg">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                                  <div className="flex-1">
+                                    <p className="font-medium text-base">{bet.horseName}</p>
+                                    <p className="text-sm text-slate-600">
+                                      Mise: {bet.amount} pts • Cote: {betCote}x
+                                    </p>
+                                  </div>
+                                  <div className="text-left sm:text-right">
+                                    <div className="text-sm text-slate-500">En cours</div>
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                          <div className="glass p-4 rounded-lg border-2 border-dashed border-slate-300">
+                            <div className="flex justify-between items-center text-sm">
+                              <span>Total parié:</span>
+                              <span className="font-bold">
+                                {userBets.reduce((sum, bet) => sum + bet.amount, 0)} points
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center text-sm mt-2">
+                              <span>Gains potentiels:</span>
+                              <span className="font-bold text-emerald-600">
+                                {Math.round(userBets.reduce((sum, bet) => {
+                                  const betCote = bet.cote || slotCount || 1;
+                                  return sum + bet.amount * betCote;
+                                }, 0) * 10) / 10} points
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Message si aucun pari */}
+                    {userBets.length === 0 && finishedBets.length === 0 && (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-4">🎯</div>
+                        <p className="text-slate-600">Aucun pari</p>
+                        <button 
+                          onClick={() => setActiveSection('parier')}
+                          className="btn btn-primary mt-4"
+                        >
+                          Placer un pari
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Bouton vers historique si courses terminées */}
+                    {finishedBets.length > 0 && (
+                      <div className="mt-6 pt-4 border-t border-slate-200">
+                        <button 
+                          onClick={handleHistoriqueClick}
+                          className="btn bg-green-600 hover:bg-green-700 text-white w-full relative"
+                        >
+                          📈 Voir l&apos;historique complet
+                          {(() => {
+                            const newFinishedBets = finishedBets.filter(bet => !viewedRaces.includes(bet.raceId))
+                            return newFinishedBets.length > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                                {newFinishedBets.length}
+                              </span>
+                            )
+                          })()}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
