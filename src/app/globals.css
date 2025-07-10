@@ -1,26 +1,437 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Couleurs PMU */
+  --pmu-green: #008037;
+  --pmu-green-dark: #005025;
+  --pmu-green-light: #00b04f;
+  --pmu-yellow: #ffdb00;
+  --pmu-yellow-dark: #e6c300;
+  --pmu-white: #ffffff;
+  --pmu-gray: #f5f5f5;
+  --pmu-gray-dark: #333333;
+  --pmu-black: #000000;
+  
+  /* Couleurs système */
+  --background: var(--pmu-gray);
+  --surface: var(--pmu-white);
+  --surface-dark: var(--pmu-green-dark);
+  --primary: var(--pmu-green);
+  --secondary: var(--pmu-yellow);
+  --text: var(--pmu-gray-dark);
+  --text-light: var(--pmu-white);
+  --border: #e0e0e0;
+  --success: var(--pmu-green);
+  --warning: var(--pmu-yellow);
+  --danger: #d32f2f;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #f8fffe, #f0f9f0);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* Glass effect PMU */
+.glass {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  color: var(--text);
+}
+
+.glass-dark {
+  background: rgba(0, 128, 55, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--pmu-green-light);
+  border-radius: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Boutons PMU */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--pmu-green), var(--pmu-green-dark));
+  color: var(--text-light);
+  border: 2px solid var(--pmu-green);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--pmu-green-light), var(--pmu-green));
+}
+
+.btn-secondary {
+  background: linear-gradient(135deg, var(--pmu-yellow), var(--pmu-yellow-dark));
+  color: var(--text);
+  border: 2px solid var(--pmu-yellow);
+}
+
+.btn-secondary:hover {
+  background: var(--pmu-yellow-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--pmu-green);
+  color: var(--pmu-green);
+}
+
+.btn-outline:hover {
+  background: var(--pmu-green);
+  color: var(--text-light);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--text-light);
+  border: 2px solid var(--danger);
+}
+
+.btn-accent {
+  background: linear-gradient(135deg, var(--pmu-yellow), var(--pmu-yellow-dark));
+  color: var(--text);
+  border: 2px solid var(--pmu-yellow-dark);
+  font-weight: 700;
+}
+
+.btn-accent:hover {
+  background: linear-gradient(135deg, var(--pmu-yellow-dark), var(--pmu-yellow));
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(255, 219, 0, 0.3);
+}
+
+/* Cards PMU */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-primary {
+  background: linear-gradient(135deg, var(--pmu-green), var(--pmu-green-dark));
+  color: var(--text-light);
+  border: 1px solid var(--pmu-green-light);
+}
+
+.card-secondary {
+  background: linear-gradient(135deg, var(--pmu-yellow), var(--pmu-yellow-dark));
+  color: var(--text);
+  border: 1px solid var(--pmu-yellow-dark);
+}
+
+.card-gradient {
+  background: linear-gradient(135deg, var(--pmu-green), var(--pmu-green-dark));
+  color: var(--text-light);
+  border: 1px solid var(--pmu-green-light);
+}
+
+/* Zone points avec meilleur contraste */
+.points-display {
+  background: linear-gradient(135deg, var(--pmu-green), var(--pmu-green-dark));
+  color: var(--pmu-yellow);
+  border: 2px solid var(--pmu-yellow);
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Formulaires PMU */
+.form-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--pmu-green);
+  box-shadow: 0 0 0 3px rgba(0, 128, 55, 0.1);
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.form-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: var(--pmu-green);
+}
+
+/* Podium */
+.podium {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.podium-place {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 1rem;
+  color: var(--text-light);
+  font-weight: bold;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.podium-first {
+  background: linear-gradient(135deg, #ffd700, #ffb300);
+  height: 180px;
+  width: 140px;
+  order: 2;
+}
+
+.podium-second {
+  background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+  height: 140px;
+  width: 120px;
+  order: 1;
+}
+
+.podium-third {
+  background: linear-gradient(135deg, #cd7f32, #b8860b);
+  height: 120px;
+  width: 120px;
+  order: 3;
+}
+
+.podium-medal {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.podium-name {
+  font-size: 0.9rem;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.podium-points {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+/* Badges et statuts */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: var(--success);
+  color: var(--text-light);
+}
+
+.badge-warning {
+  background: var(--warning);
+  color: var(--text);
+}
+
+.badge-danger {
+  background: var(--danger);
+  color: var(--text-light);
+}
+
+.badge-info {
+  background: var(--pmu-green);
+  color: var(--text-light);
+}
+
+/* Formats de course */
+.format-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.format-long {
+  background: linear-gradient(135deg, #1565c0, #0d47a1);
+  color: var(--text-light);
+}
+
+.format-fun {
+  background: linear-gradient(135deg, var(--pmu-yellow), var(--pmu-yellow-dark));
+  color: var(--text);
+}
+
+.format-court {
+  background: linear-gradient(135deg, #e53935, #c62828);
+  color: var(--text-light);
+}
+
+/* Tables */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+  background: var(--pmu-green);
+  color: var(--text-light);
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+}
+
+.table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.table tr:hover {
+  background: rgba(0, 128, 55, 0.05);
+}
+
+/* Header PMU */
+.header-pmu {
+  background: linear-gradient(135deg, var(--pmu-green), var(--pmu-green-dark));
+  color: var(--text-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Animations */
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-slideUp {
+  animation: slideUp 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Spinner */
+.spinner {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--pmu-yellow);
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .podium {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .podium-place {
+    width: 200px;
+    height: auto;
+    min-height: 120px;
+  }
+  
+  .podium-first, .podium-second, .podium-third {
+    order: initial;
+    width: 200px;
+    height: auto;
+    min-height: 120px;
+  }
+  
+  .btn {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.9rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+  
+  .form-input, .form-select {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+  }
 }

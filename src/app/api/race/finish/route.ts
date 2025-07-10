@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MongoClient, ObjectId } from 'mongodb'
-
-const uri = process.env.MONGODB_URI!
-const client = new MongoClient(uri)
-
-let clientPromise: Promise<MongoClient> | null = null
+import { ObjectId } from 'mongodb'
+import getClientPromise from '@/lib/mongodb'
 
 async function connect() {
-  if (!clientPromise) {
-    clientPromise = client.connect()
-  }
-  await clientPromise
+  const client = await getClientPromise()
   return client.db('cheval-bet')
 }
 

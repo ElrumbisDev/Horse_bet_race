@@ -1,16 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MongoClient, ObjectId } from 'mongodb'
-
-const uri = process.env.MONGODB_URI!
-const client = new MongoClient(uri)
-
-let clientPromise: Promise<MongoClient> | null = null
+import { ObjectId } from 'mongodb'
+import getClientPromise from '@/lib/mongodb'
 
 async function connect() {
-  if (!clientPromise) {
-    clientPromise = client.connect()
-  }
-  await clientPromise
+  const client = await getClientPromise()
   return client.db('cheval-bet')
 }
 
@@ -38,17 +31,49 @@ export async function GET(request: NextRequest) {
         taken: slot.taken
       }))
       
-      // Convert horses to format expected by main page
-      const horses = (nextRace.horses || []).map((horse: { name: string }, index: number) => ({
-        id: horse.name + index, // Generate unique id
-        name: horse.name
+      // Calculer les cotes dynamiques pour chaque cheval
+      const betsCollection = db.collection('bets')
+      const raceId = nextRace._id.toString()
+      
+      // Récupérer tous les paris pour cette course
+      const raceBets = await betsCollection.find({ raceId }).toArray()
+      
+      // Calculer les cotes pour chaque cheval
+      const horses = await Promise.all((nextRace.horses || []).map(async (horse: { name: string }, index: number) => {
+        // Compter les paris sur ce cheval
+        const horseBets = raceBets.filter(bet => bet.horseName === horse.name)
+        const totalBetsOnHorse = horseBets.reduce((sum, bet) => sum + bet.amount, 0)
+        const totalRaceBets = raceBets.reduce((sum, bet) => sum + bet.amount, 0)
+        
+        // Formule de cote dynamique
+        // Cote de base = nombre total de chevaux
+        // Cote ajustée en fonction des paris
+        const baseOdds = nextRace.horses?.length || 1
+        let dynamicOdds = baseOdds
+        
+        if (totalRaceBets > 0 && totalBetsOnHorse > 0) {
+          // Plus il y a de paris sur ce cheval, plus la cote diminue
+          const betRatio = totalBetsOnHorse / totalRaceBets
+          // Cote minimale de 1.1, maximale de baseOdds * 2
+          dynamicOdds = Math.max(1.1, baseOdds * (1 - betRatio * 0.7))
+          dynamicOdds = Math.min(dynamicOdds, baseOdds * 2)
+        }
+        
+        return {
+          id: horse.name + index,
+          name: horse.name,
+          cote: Math.round(dynamicOdds * 10) / 10, // Arrondir à 1 décimale
+          totalBets: totalBetsOnHorse,
+          betsCount: horseBets.length
+        }
       }))
       
       return NextResponse.json({
         nextRace: {
           id: nextRace._id.toString(),
           title: nextRace.name,
-          date: nextRace.date
+          date: nextRace.date,
+          format: nextRace.format || 'fun'
         },
         slots,
         horses

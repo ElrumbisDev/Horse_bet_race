@@ -1,285 +1,545 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
+import Link from 'next/link'
 
-type Slot = { id: number; taken: boolean }
-type Horse = { id: string; name: string; userName?: string }
-
-type Course = {
+type Race = {
   _id: string
   name: string
   date: string
   slots: number
-  slotsArray?: Slot[]
-  horses?: Horse[]
-  finished?: boolean
+  horses: Array<{ name: string; userId: string; userName: string }>
+  finished: boolean
   winner?: string
+  format: 'long' | 'fun' | 'court'
 }
 
-type WinnerSelectionProps = {
-  courseId: string
-  horses: Horse[]
-  onSelect: (courseId: string, winnerName: string) => void
-  onCancel: () => void
+type Bet = {
+  _id: string
+  userId: string
+  userName?: string
+  raceId: string
+  raceName: string
+  horseName: string
+  amount: number
+  cote: number
+  createdAt: string
+  finished: boolean
+  won?: boolean
 }
 
-function WinnerSelection({ courseId, horses, onSelect, onCancel }: WinnerSelectionProps) {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-xl font-bold mb-4">Sélectionner le cheval gagnant</h3>
-        <div className="space-y-2 mb-6">
-          {horses.map((horse, index) => (
-            <button
-              key={index}
-              onClick={() => onSelect(courseId, horse.name)}
-              className="w-full p-3 text-left border rounded hover:bg-blue-50 hover:border-blue-300 transition-colors"
-            >
-              <div className="font-semibold">{horse.name}</div>
-              <div className="text-sm text-gray-600">Propriétaire: {horse.userName}</div>
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={onCancel}
-          className="w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
-        >
-          Annuler
-        </button>
-      </div>
-    </div>
-  )
+type User = {
+  userId: string
+  email: string
+  displayName: string
+  points: number
+  createdAt: string
+  totalBets: number
+  wonBets: number
+  lostBets: number
+  totalBetAmount: number
+  winRate: number
+}
+
+// Fonction utilitaire pour afficher le nom utilisateur
+const formatUserName = (user: User) => {
+  // L'API retourne déjà le bon displayName (username, firstName, ou email)
+  return user.displayName || user.email?.split('@')[0] || user.userId
 }
 
 export default function AdminPage() {
-  const [courses, setCourses] = useState<Course[]>([])
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({ name: '', date: '', slots: 0, _id: '' })
-  const [showWinnerSelection, setShowWinnerSelection] = useState<{courseId: string, horses: Horse[]} | null>(null)
+  const { user } = useUser()
+  const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users'>('races')
+  const [races, setRaces] = useState<Race[]>([])
+  const [bets, setBets] = useState<Bet[]>([])
+  const [users, setUsers] = useState<User[]>([])
+  const [loading, setLoading] = useState(true)
 
-  // Charger les courses depuis l'API
+  // Formulaire nouvelle course
+  const [newRace, setNewRace] = useState({
+    name: '',
+    date: '',
+    slots: 8,
+    format: 'fun' as Race['format']
+  })
+
   useEffect(() => {
-    setLoading(true)
-    fetch('/api/race?admin=true')
-      .then(res => res.json())
-      .then(data => setCourses(data))
-      .finally(() => setLoading(false))
+    fetchAdminData()
   }, [])
 
-  // Gérer l'envoi du formulaire (ajout ou modification)
-  async function handleSubmit(e: React.FormEvent) {
+  const fetchAdminData = async () => {
+    setLoading(true)
+    try {
+      const [racesRes, betsRes, usersRes] = await Promise.all([
+        fetch('/api/admin/races'),
+        fetch('/api/admin/bets'),
+        fetch('/api/admin/users')
+      ])
+
+      if (racesRes.ok) setRaces(await racesRes.json())
+      if (betsRes.ok) setBets(await betsRes.json())
+      if (usersRes.ok) setUsers(await usersRes.json())
+    } catch (error) {
+      console.error('Erreur chargement admin:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const createRace = async (e: React.FormEvent) => {
     e.preventDefault()
-    const method = form._id ? 'PUT' : 'POST'
-    const url = '/api/race'
+    try {
+      const response = await fetch('/api/admin/races', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRace)
+      })
 
-    const body = form._id
-      ? { raceId: form._id, name: form.name, date: form.date, slots: form.slots }
-      : { name: form.name, date: form.date, slots: form.slots }
-
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (res.ok) {
-      // Recharger la liste
-      const updated = await fetch('/api/race?admin=true').then(r => r.json())
-      setCourses(updated)
-      setForm({ name: '', date: '', slots: 0, _id: '' })
-    } else {
-      alert('Erreur lors de la sauvegarde')
+      if (response.ok) {
+        setNewRace({ name: '', date: '', slots: 8, format: 'fun' })
+        await fetchAdminData()
+      }
+    } catch (error) {
+      console.error('Erreur création course:', error)
     }
   }
 
-  // Pré-remplir le formulaire pour modifier
-  function handleEdit(course: Course) {
-    setForm({
-      _id: course._id,
-      name: course.name,
-      date: course.date,
-      slots: course.slots,
-    })
-  }
+  const finishRace = async (raceId: string, winner: string) => {
+    try {
+      const response = await fetch('/api/race/finish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceId, winnerHorseName: winner })
+      })
 
-  // Supprimer une course
-  async function handleDelete(courseId: string) {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer cette course ?')) {
-      return
-    }
-
-    const res = await fetch('/api/race', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raceId: courseId }),
-    })
-
-    if (res.ok) {
-      // Recharger la liste
-      const updated = await fetch('/api/race?admin=true').then(r => r.json())
-      setCourses(updated)
-      alert('Course supprimée avec succès')
-    } else {
-      alert('Erreur lors de la suppression')
+      if (response.ok) {
+        await fetchAdminData()
+      }
+    } catch (error) {
+      console.error('Erreur fin de course:', error)
     }
   }
 
-  // Terminer une course avec un cheval gagnant
-  function handleFinishRace(courseId: string, horses: Horse[]) {
-    if (horses.length === 0) {
-      alert('Aucun cheval inscrit dans cette course')
-      return
+  const deleteRace = async (raceId: string) => {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cette course ?')) return
+
+    try {
+      const response = await fetch('/api/race', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceId })
+      })
+
+      if (response.ok) {
+        await fetchAdminData()
+      }
+    } catch (error) {
+      console.error('Erreur suppression course:', error)
     }
-    setShowWinnerSelection({ courseId, horses })
   }
 
-  // Confirmer le cheval gagnant
-  async function confirmWinner(courseId: string, winnerHorseName: string) {
-    setShowWinnerSelection(null)
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('fr-FR')
+  }
 
-    const res = await fetch('/api/race/finish', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raceId: courseId, winnerHorseName }),
-    })
-
-    if (res.ok) {
-      const result = await res.json()
-      alert(`${result.message}\nParis gagnants: ${result.winningBets}\nGains distribués: ${result.totalWinnings} points`)
-      // Recharger la liste
-      const updated = await fetch('/api/race?admin=true').then(r => r.json())
-      setCourses(updated)
-    } else {
-      const error = await res.json()
-      alert(error.message || 'Erreur lors de la finalisation')
+  const getFormatBadge = (format: Race['format']) => {
+    const badges = {
+      long: <span className="format-badge format-long">🏃‍♂️ Format Long</span>,
+      fun: <span className="format-badge format-fun">🎉 Format Fun</span>,
+      court: <span className="format-badge format-court">⚡ Format Court</span>
     }
+    return badges[format]
+  }
+
+  const getStatusBadge = (finished: boolean, won?: boolean) => {
+    if (!finished) return <span className="badge badge-warning">En cours</span>
+    return won 
+      ? <span className="badge badge-success">Gagné</span>
+      : <span className="badge badge-danger">Perdu</span>
   }
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Administration des Courses</h1>
+    <div className="min-h-screen">
+      <SignedOut>
+        <div className="container mx-auto px-4 py-20">
+          <div className="max-w-md mx-auto text-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-6">
+              Accès admin requis
+            </h1>
+            <div className="card bg-white">
+              <div className="text-center">
+                <div className="text-4xl mb-4">🔐</div>
+                <p className="text-gray-600 mb-6">
+                  Connecte-toi pour accéder au panneau d'administration
+                </p>
+                <Link href="/sign-in" className="btn btn-primary text-lg px-8 py-4">
+                  Se connecter
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </SignedOut>
 
-      {loading ? (
-        <p>Chargement...</p>
-      ) : (
-        <>
-          <ul className="mb-8">
-            {courses.map(course => {
-              const takenSlots = course.slotsArray ? course.slotsArray.filter((slot: Slot) => slot.taken).length : 0
-              const isFull = takenSlots >= course.slots
-              const horses = course.horses || []
-              const isFinished = course.finished
-              
-              return (
-                <li
-                  key={course._id}
-                  className={`border-b py-4 cursor-pointer ${
-                    isFinished 
-                      ? 'bg-gray-50 border-gray-200' 
-                      : isFull 
-                        ? 'bg-red-50 border-red-200' 
-                        : 'bg-green-50 border-green-200'
-                  }`}
-                  onClick={() => !isFinished && handleEdit(course)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="font-semibold text-purple-700">{course.name}</span>
-                        <span className="text-sm text-gray-600">— {course.date}</span>
-                        <span className={`px-2 py-1 text-xs rounded ${
-                          isFinished
-                            ? 'bg-gray-100 text-gray-800'
-                            : isFull 
-                              ? 'bg-red-100 text-red-800' 
-                              : 'bg-green-100 text-green-800'
-                        }`}>
-                          {isFinished ? 'TERMINÉE' : `${takenSlots}/${course.slots} slots`}
-                        </span>
-                        {isFinished && course.winner && (
-                          <span className="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">
-                            Gagnant: {course.winner}
-                          </span>
-                        )}
+      <SignedIn>
+        <div className="container mx-auto px-4 py-8">
+          {/* Header */}
+          <div className="text-center mb-8 animate-fadeIn">
+            <h1 className="text-4xl font-bold text-gray-800 mb-4">
+              🔧 Panneau d'Administration
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Gestion des courses, paris et utilisateurs
+            </p>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex justify-center mb-8">
+            <div className="flex gap-2 bg-gray-100 p-1 rounded-lg">
+              <button
+                onClick={() => setActiveTab('races')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  activeTab === 'races'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                🏇 Courses ({races.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('bets')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  activeTab === 'bets'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                🎯 Paris ({bets.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  activeTab === 'users'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                👥 Utilisateurs ({users.length})
+              </button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-pulse">
+                <div className="text-4xl mb-4">⏳</div>
+                <p className="text-gray-600">Chargement des données...</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Tab Courses */}
+              {activeTab === 'races' && (
+                <div className="space-y-8">
+                  {/* Formulaire nouvelle course */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      ➕ Créer une nouvelle course
+                    </h2>
+                    <form onSubmit={createRace} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="form-label">Nom de la course</label>
+                        <input
+                          type="text"
+                          value={newRace.name}
+                          onChange={(e) => setNewRace({ ...newRace, name: e.target.value })}
+                          className="form-input"
+                          placeholder="Course du dimanche"
+                          required
+                        />
                       </div>
-                      {horses.length > 0 && (
-                        <div className="text-sm text-gray-700">
-                          <strong>Chevaux inscrits:</strong> {horses.map((horse: Horse) => 
-                            `${horse.name} (${horse.userName || 'Utilisateur'})`
-                          ).join(', ')}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex gap-2">
-                      {!isFinished && horses.length > 0 && (
-                        <button
-                          onClick={e => {
-                            e.stopPropagation()
-                            handleFinishRace(course._id, horses)
-                          }}
-                          className="bg-blue-600 text-white px-3 py-1 text-sm rounded hover:bg-blue-700"
+                      
+                      <div>
+                        <label className="form-label">Date et heure</label>
+                        <input
+                          type="datetime-local"
+                          value={newRace.date}
+                          onChange={(e) => setNewRace({ ...newRace, date: e.target.value })}
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Nombre de slots</label>
+                        <input
+                          type="number"
+                          min="3"
+                          max="16"
+                          value={newRace.slots}
+                          onChange={(e) => setNewRace({ ...newRace, slots: Number(e.target.value) })}
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Format</label>
+                        <select
+                          value={newRace.format}
+                          onChange={(e) => setNewRace({ ...newRace, format: e.target.value as Race['format'] })}
+                          className="form-select"
+                          required
                         >
-                          Terminer
+                          <option value="fun">🎉 Format Fun</option>
+                          <option value="court">⚡ Format Court</option>
+                          <option value="long">🏃‍♂️ Format Long</option>
+                        </select>
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <button type="submit" className="btn btn-primary">
+                          🏁 Créer la course
                         </button>
-                      )}
-                      <button
-                        onClick={e => {
-                          e.stopPropagation()
-                          handleDelete(course._id)
-                        }}
-                        className="text-red-600 hover:text-red-800 px-2 py-1 text-sm"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
+                      </div>
+                    </form>
                   </div>
-                </li>
-              )
-            })}
-          </ul>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
-            <input
-              type="text"
-              placeholder="Nom de la course"
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-              required
-              className="border rounded px-3 py-2"
-            />
-            <input
-              type="datetime-local"
-              value={form.date}
-              onChange={e => setForm({ ...form, date: e.target.value })}
-              required
-              className="border rounded px-3 py-2"
-            />
-            <input
-              type="number"
-              min={1}
-              value={form.slots}
-              onChange={e => setForm({ ...form, slots: Number(e.target.value) })}
-              required
-              className="border rounded px-3 py-2"
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white px-4 py-2 rounded font-bold"
-            >
-              {form._id ? 'Modifier' : 'Ajouter'}
-            </button>
-          </form>
-        </>
-      )}
-      
-      {showWinnerSelection && (
-        <WinnerSelection
-          courseId={showWinnerSelection.courseId}
-          horses={showWinnerSelection.horses}
-          onSelect={confirmWinner}
-          onCancel={() => setShowWinnerSelection(null)}
-        />
-      )}
-    </main>
+                  {/* Liste des courses */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      📋 Gestion des courses
+                    </h2>
+                    
+                    {races.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-4">🏇</div>
+                        <p className="text-gray-600">Aucune course créée</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Course</th>
+                              <th>Format</th>
+                              <th>Date</th>
+                              <th>Chevaux</th>
+                              <th>Statut</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {races.map((race) => (
+                              <tr key={race._id}>
+                                <td>
+                                  <div className="font-medium text-gray-800">
+                                    {race.name}
+                                  </div>
+                                </td>
+                                <td>
+                                  {getFormatBadge(race.format)}
+                                </td>
+                                <td>
+                                  <div className="text-sm text-gray-600">
+                                    {formatDate(race.date)}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="text-center">
+                                    <span className="font-bold text-green-600">
+                                      {race.horses?.length || 0}
+                                    </span>
+                                    <span className="text-gray-500">
+                                      /{race.slots}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  {race.finished ? (
+                                    <span className="badge badge-success">
+                                      Terminée - {race.winner}
+                                    </span>
+                                  ) : (
+                                    <span className="badge badge-warning">En cours</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="flex gap-2">
+                                    {!race.finished && race.horses && race.horses.length > 0 && (
+                                      <select
+                                        onChange={(e) => e.target.value && finishRace(race._id, e.target.value)}
+                                        className="text-xs border rounded px-2 py-1"
+                                        defaultValue=""
+                                      >
+                                        <option value="">Terminer course</option>
+                                        {race.horses.map((horse) => (
+                                          <option key={horse.name} value={horse.name}>
+                                            {horse.name}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    )}
+                                    <button
+                                      onClick={() => deleteRace(race._id)}
+                                      className="btn-danger text-xs px-2 py-1 rounded"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab Paris */}
+              {activeTab === 'bets' && (
+                <div className="card">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    🎯 Suivi des paris en cours
+                  </h2>
+                  
+                  {bets.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-4xl mb-4">🎲</div>
+                      <p className="text-gray-600">Aucun pari enregistré</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Utilisateur</th>
+                            <th>Course</th>
+                            <th>Cheval</th>
+                            <th>Mise</th>
+                            <th>Cote</th>
+                            <th>Date</th>
+                            <th>Statut</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bets.map((bet) => (
+                            <tr key={bet._id}>
+                              <td>
+                                <div className="font-medium text-gray-800">
+                                  {bet.userName || bet.userId}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-sm text-gray-600">
+                                  {bet.raceName}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="font-medium text-green-600">
+                                  🏇 {bet.horseName}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="font-bold">
+                                  {bet.amount} pts
+                                </div>
+                              </td>
+                              <td>
+                                <div className="font-medium text-blue-600">
+                                  {bet.cote}x
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-sm text-gray-600">
+                                  {formatDate(bet.createdAt)}
+                                </div>
+                              </td>
+                              <td>
+                                {getStatusBadge(bet.finished, bet.won)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Tab Utilisateurs */}
+              {activeTab === 'users' && (
+                <div className="card">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    👥 Gestion des utilisateurs
+                  </h2>
+                  
+                  {users.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-4xl mb-4">👤</div>
+                      <p className="text-gray-600">Aucun utilisateur inscrit</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="table">
+                        <thead>
+                          <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Points</th>
+                            <th>Date d'inscription</th>
+                            <th>Statut</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {users.map((user) => (
+                            <tr key={user.userId}>
+                              <td>
+                                <div className="font-medium text-gray-800">
+                                  {formatUserName(user)}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-sm text-gray-600">
+                                  {user.email}
+                                </div>
+                              </td>
+                              <td>
+                                <div className="font-bold text-green-600">
+                                  {user.points} points
+                                </div>
+                              </td>
+                              <td>
+                                <div className="text-sm text-gray-600">
+                                  {formatDate(user.createdAt)}
+                                </div>
+                              </td>
+                              <td>
+                                {user.points > 200 && (
+                                  <span className="badge badge-success">Expert</span>
+                                )}
+                                {user.points >= 100 && user.points <= 200 && (
+                                  <span className="badge badge-info">Intermédiaire</span>
+                                )}
+                                {user.points < 100 && (
+                                  <span className="badge badge-warning">Débutant</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </SignedIn>
+    </div>
   )
 }

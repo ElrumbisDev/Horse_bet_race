@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
+import getClientPromise from '@/lib/mongodb'
 import { auth } from '@clerk/nextjs/server'
 
 export async function GET() {
@@ -10,7 +10,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const client = await clientPromise
+    const client = await getClientPromise()
     const db = client.db('cheval-bet')
     const usersCollection = db.collection('users')
 
@@ -34,29 +34,48 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { userId, email } = await request.json()
+  const { userId, email, name, firstName, username } = await request.json()
 
-  if (!userId || !email) {
-    return NextResponse.json({ error: 'Missing userId or email' }, { status: 400 })
+  if (!userId) {
+    return NextResponse.json({ error: 'Missing userId' }, { status: 400 })
   }
 
   try {
-    const client = await clientPromise
+    const client = await getClientPromise()
     const db = client.db('cheval-bet')
     const usersCollection = db.collection('users')
 
     const existingUser = await usersCollection.findOne({ userId })
 
+    // Créer le displayName selon la même logique que le dashboard
+    const displayName = firstName || username || email?.split('@')[0] || 'Utilisateur'
+
     if (!existingUser) {
       await usersCollection.insertOne({
         userId,
         email,
+        name: displayName,
+        firstName,
+        username,
         points: 100,
         createdAt: new Date(),
       })
       return NextResponse.json({ message: 'User created with 100 points', points: 100 }, { status: 201 })
     } else {
-      return NextResponse.json({ message: 'User exists', points: existingUser.points }, { status: 200 })
+      // Mettre à jour les informations utilisateur
+      await usersCollection.updateOne(
+        { userId },
+        { 
+          $set: { 
+            email: email || existingUser.email,
+            name: displayName,
+            firstName,
+            username,
+            updatedAt: new Date()
+          } 
+        }
+      )
+      return NextResponse.json({ message: 'User updated', points: existingUser.points }, { status: 200 })
     }
   } catch {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
