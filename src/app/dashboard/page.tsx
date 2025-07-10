@@ -104,18 +104,30 @@ export default function DashboardPage() {
     fetchData()
   }, [user, fetchData])
 
+  // Vérifier que le slot sélectionné est toujours valide quand les slots changent
+  useEffect(() => {
+    if (selectedSlot && !slots.find(s => s.id === selectedSlot)) {
+      setSelectedSlot(null)
+    }
+  }, [slots, selectedSlot])
+
   function handleSlotSelect(id: number) {
-    if (slots.find(s => s.id === id)?.taken) return
+    // Vérifier que le slot existe et n'est pas pris
+    const slot = slots.find(s => s.id === id)
+    if (!slot || slot.taken) return
     setSelectedSlot(id)
   }
 
   function handleRaceSelection(race: Race) {
-    setSelectedRace(race)
-    setSlots(race.slots || [])
-    setRegisteredHorses(race.horses || [])
+    // Réinitialiser d'abord les états pour éviter les conflits
     setSelectedSlot(null)
     setSelectedHorse('')
     setBetAmount(0)
+    
+    // Ensuite mettre à jour la course et ses données
+    setSelectedRace(race)
+    setSlots(race.slots || [])
+    setRegisteredHorses(race.horses || [])
   }
 
   async function handleSubmitInscription(e: React.FormEvent) {
