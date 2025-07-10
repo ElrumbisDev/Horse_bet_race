@@ -57,19 +57,17 @@ export default function DashboardPage() {
         setShowWelcomePopup(true)
       }
 
-      const [resUser, resAllRaces, resNextRace, resBets, resFinishedBets, resViewedRaces] = await Promise.all([
+      const [resUser, resAllRaces, resBets, resFinishedBets, resViewedRaces] = await Promise.all([
         fetch('/api/user'),
         fetch('/api/race?all=true'),
-        fetch('/api/race'),
         fetch('/api/bet'),
         fetch('/api/bet?finished=true'),
         fetch('/api/user/viewed-races')
       ])
 
-      const [userData, allRacesData, nextRaceData, betsData, finishedBetsData, viewedRacesData] = await Promise.all([
+      const [userData, allRacesData, betsData, finishedBetsData, viewedRacesData] = await Promise.all([
         resUser.json(),
         resAllRaces.json(),
-        resNextRace.json(),
         resBets.json(),
         resFinishedBets.json(),
         resViewedRaces.json()
