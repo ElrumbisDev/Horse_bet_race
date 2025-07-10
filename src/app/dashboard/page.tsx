@@ -17,7 +17,6 @@ export default function DashboardPage() {
   const [userPoints, setUserPoints] = useState(0)
   const [upcomingRaces, setUpcomingRaces] = useState<Race[]>([])
   const [selectedRace, setSelectedRace] = useState<Race | null>(null)
-  const [nextRace, setNextRace] = useState<Race | null>(null)
   const [slots, setSlots] = useState<Slot[]>([])
   const [registeredHorses, setRegisteredHorses] = useState<Horse[]>([])
   const [userBets, setUserBets] = useState<Array<{ amount: number; horseName: string; raceId: string; cote?: number; finished?: boolean; won?: boolean; winnings?: number }>>([])
@@ -78,7 +77,6 @@ export default function DashboardPage() {
 
       setUserPoints(userData.points)
       setUpcomingRaces(allRacesData.races || [])
-      setNextRace(nextRaceData.nextRace)
       setSlots(nextRaceData.slots)
       setRegisteredHorses(nextRaceData.horses)
       setUserBets(betsData)
