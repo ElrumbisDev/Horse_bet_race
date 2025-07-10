@@ -8,7 +8,7 @@ export default function HomePage() {
     <main className="min-h-screen bg-gradient-to-br from-green-600 via-yellow-500 to-red-500 p-8 text-white">
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="mb-12 text-6xl font-extrabold drop-shadow-lg text-center">
-          Le PMU d'Artsonic
+          Le PMU d&apos;Artsonic
         </h1>
         
         <div className="mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 w-full">
