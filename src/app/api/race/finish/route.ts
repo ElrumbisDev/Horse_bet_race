@@ -73,16 +73,19 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // Marquer les paris gagnants
-    await db.collection('bets').updateMany(
-      { raceId, horseName: winnerHorseName },
-      { $set: { won: true } }
-    )
+    // Marquer les paris gagnants avec les gains
+    for (const bet of winningBets) {
+      const winnings = bet.amount * 2
+      await db.collection('bets').updateOne(
+        { _id: bet._id },
+        { $set: { won: true, winnings: winnings } }
+      )
+    }
 
     // Marquer les paris perdants
     await db.collection('bets').updateMany(
       { raceId, horseName: { $ne: winnerHorseName } },
-      { $set: { won: false } }
+      { $set: { won: false, winnings: 0 } }
     )
 
     return NextResponse.json({ 

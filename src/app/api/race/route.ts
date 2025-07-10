@@ -10,7 +10,6 @@ async function connect() {
 export async function GET(request: NextRequest) {
   try {
     const db = await connect()
-    const courses = await db.collection('courses').find().toArray()
     
     // Check if this is an admin request
     const { searchParams } = new URL(request.url)
@@ -18,11 +17,71 @@ export async function GET(request: NextRequest) {
     
     if (isAdmin) {
       // Return raw courses data for admin
+      const courses = await db.collection('courses').find().toArray()
       return NextResponse.json(courses)
     }
     
-    // Find the next race (first available race)
-    const nextRace = courses.length > 0 ? courses[0] : null
+    // For regular users, only show upcoming races (not finished)
+    const upcomingRaces = await db.collection('courses')
+      .find({ finished: { $ne: true } })
+      .sort({ date: 1 })
+      .toArray()
+    
+    // Check if user wants all upcoming races or just the next one
+    const showAll = searchParams.get('all') === 'true'
+    
+    if (showAll) {
+      // Return all upcoming races with their data
+      const racesWithData = await Promise.all(upcomingRaces.map(async (race) => {
+        // Convert slotsArray to slots format
+        const slots = (race.slotsArray || []).map((slot: { slotNumber: number; taken: boolean }) => ({
+          id: slot.slotNumber,
+          taken: slot.taken
+        }))
+        
+        // Calculate dynamic odds for each horse
+        const betsCollection = db.collection('bets')
+        const raceId = race._id.toString()
+        const raceBets = await betsCollection.find({ raceId }).toArray()
+        
+        const horses = await Promise.all((race.horses || []).map(async (horse: { name: string }, index: number) => {
+          const horseBets = raceBets.filter(bet => bet.horseName === horse.name)
+          const totalBetsOnHorse = horseBets.reduce((sum, bet) => sum + bet.amount, 0)
+          const totalRaceBets = raceBets.reduce((sum, bet) => sum + bet.amount, 0)
+          
+          const baseOdds = race.horses?.length || 1
+          let dynamicOdds = baseOdds
+          
+          if (totalRaceBets > 0 && totalBetsOnHorse > 0) {
+            const betRatio = totalBetsOnHorse / totalRaceBets
+            dynamicOdds = Math.max(1.1, baseOdds * (1 - betRatio * 0.7))
+            dynamicOdds = Math.min(dynamicOdds, baseOdds * 2)
+          }
+          
+          return {
+            id: horse.name + index,
+            name: horse.name,
+            cote: Math.round(dynamicOdds * 10) / 10,
+            totalBets: totalBetsOnHorse,
+            betsCount: horseBets.length
+          }
+        }))
+        
+        return {
+          id: race._id.toString(),
+          title: race.name,
+          date: race.date,
+          format: race.format || 'fun',
+          slots,
+          horses
+        }
+      }))
+      
+      return NextResponse.json({ races: racesWithData })
+    }
+    
+    // Find the next race (first upcoming race)
+    const nextRace = upcomingRaces.length > 0 ? upcomingRaces[0] : null
     
     if (nextRace) {
       // Convert slotsArray to slots format expected by main page

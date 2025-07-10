@@ -42,22 +42,13 @@ export default function RootLayout({
                   </div>
                   <div className="flex flex-col">
                     <span className="font-bold text-xl text-white">PMU Artsonic</span>
-                    <span className="text-xs text-yellow-300">Paris hippiques virtuels</span>
+                    <span className="text-xs text-yellow-300">- 61 Degrés x Hole Right - </span>
                   </div>
                 </Link>
 
                 {/* Navigation */}
-                <nav className="hidden md:flex items-center space-x-6">
+                <nav className="hidden md:flex items-right justify-right space-x-6">
                   <SignedIn>
-                    <Link href="/dashboard" className="text-white hover:text-yellow-300 transition-colors font-medium">
-                      Dashboard
-                    </Link>
-                    <Link href="/scores" className="text-white hover:text-yellow-300 transition-colors font-medium">
-                      Scores
-                    </Link>
-                    <Link href="/historique" className="text-white hover:text-yellow-300 transition-colors font-medium">
-                      Historique
-                    </Link>
                     <Link href="/admin" className="text-white hover:text-yellow-300 transition-colors font-medium">
                       Admin
                     </Link>
@@ -66,18 +57,6 @@ export default function RootLayout({
 
                 {/* Auth buttons */}
                 <div className="flex items-center space-x-3">
-                  <SignedOut>
-                    <SignInButton>
-                      <button className="btn btn-outline text-sm px-4 py-2">
-                        Connexion
-                      </button>
-                    </SignInButton>
-                    <SignUpButton>
-                      <button className="btn btn-secondary text-sm px-4 py-2">
-                        Inscription
-                      </button>
-                    </SignUpButton>
-                  </SignedOut>
                   <SignedIn>
                     <UserButton 
                       appearance={{
@@ -103,7 +82,7 @@ export default function RootLayout({
           <footer className="mt-auto bg-gray-800 border-t border-gray-300">
             <div className="container mx-auto px-4 py-6">
               <div className="text-center text-gray-300 text-sm">
-                <p className="mb-2 font-medium">PMU Artsonic - Plateforme de paris hippiques virtuels</p>
+                <p className="mb-2 font-medium">PMU Artsonic - Developpé par Eliott Moores Freelance</p>
                 <div className="flex justify-center space-x-6">
                   <Link href="/regles" className="hover:text-yellow-300 transition-colors font-medium">
                     📋 Règles

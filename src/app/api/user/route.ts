@@ -60,7 +60,7 @@ export async function POST(request: Request) {
         points: 100,
         createdAt: new Date(),
       })
-      return NextResponse.json({ message: 'User created with 100 points', points: 100 }, { status: 201 })
+      return NextResponse.json({ message: 'User created with 100 points', points: 100, isNewUser: true }, { status: 201 })
     } else {
       // Mettre à jour les informations utilisateur
       await usersCollection.updateOne(
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
           } 
         }
       )
-      return NextResponse.json({ message: 'User updated', points: existingUser.points }, { status: 200 })
+      return NextResponse.json({ message: 'User updated', points: existingUser.points, isNewUser: false }, { status: 200 })
     }
   } catch {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })

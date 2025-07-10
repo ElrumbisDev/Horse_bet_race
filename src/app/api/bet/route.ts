@@ -18,11 +18,14 @@ export async function GET(request: Request) {
     const db = client.db('cheval-bet')
     const betsCollection = db.collection('bets')
 
-    const query: { userId: string; finished?: { $ne: boolean } } = { userId }
+    const query: { userId: string; finished?: { $ne: boolean } | true } = { userId }
     
     if (!includeFinished) {
       // Par défaut, ne retourner que les paris en cours (non terminés)
       query.finished = { $ne: true }
+    } else {
+      // Si includeFinished=true, ne retourner que les paris terminés
+      query.finished = true
     }
 
     const bets = await betsCollection.find(query).toArray()

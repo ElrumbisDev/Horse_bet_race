@@ -17,7 +17,9 @@
       "Bash(touch:*)",
       "Bash(mkdir:*)",
       "Bash(curl:*)",
-      "Bash(find /mnt/c/Users/eliot/Desktop/cheval-bet/cheval-bet -type f -name \"*.js\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.tsx\" -o -name \"*.json\")"
+      "Bash(find /mnt/c/Users/eliot/Desktop/cheval-bet/cheval-bet -type f -name \"*.js\" -o -name \"*.ts\" -o -name \"*.jsx\" -o -name \"*.tsx\" -o -name \"*.json\")",
+      "Bash(npx next lint:*)",
+      "Bash(timeout 10s npm run dev)"
     ],
     "deny": []
   }
