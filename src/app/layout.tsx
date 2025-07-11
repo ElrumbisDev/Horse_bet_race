@@ -8,8 +8,8 @@ import './globals.css'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'PMU Artsonic - Pariez sur les chevaux virtuels',
-  description: 'Plateforme de paris sur chevaux virtuels avec points et récompenses',
+  title: 'PMU Artsonic - Pariez sur les chevaux',
+  description: 'Plateforme de paris sur chevaux',
 }
 
 export const viewport: Viewport = {
@@ -117,7 +117,7 @@ export default function RootLayout({
                     📋 Règles
                   </Link>
                   <a 
-                    href="https://instagram.com/61degres" 
+                    href="https://www.instagram.com/61_degres/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="hover:text-yellow-300 transition-colors font-medium"
@@ -125,12 +125,12 @@ export default function RootLayout({
                     📸 @61degres
                   </a>
                   <a 
-                    href="https://instagram.com/hole" 
+                    href="https://www.instagram.com/hole_right_off/" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="hover:text-yellow-300 transition-colors font-medium"
                   >
-                    📸 @hole
+                    📸 @hole_right
                   </a>
                 </div>
               </div>
