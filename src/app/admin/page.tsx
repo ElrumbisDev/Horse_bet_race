@@ -13,6 +13,7 @@ type Race = {
   finished: boolean
   winner?: string
   format: 'long' | 'fun' | 'court'
+  betsProcessed?: boolean
 }
 
 type Bet = {
@@ -107,6 +108,10 @@ export default function AdminPage() {
     horseName: '',
     slotNumber: 0
   })
+
+  // Gestion des gagnants
+  const [selectedRaceForWinner, setSelectedRaceForWinner] = useState('')
+  const [selectedWinner, setSelectedWinner] = useState('')
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -393,6 +398,99 @@ export default function AdminPage() {
     }
   }
 
+  // Fonctions pour la gestion des gagnants
+  const confirmRaceWinner = async () => {
+    if (!selectedRaceForWinner || !selectedWinner) {
+      alert('Veuillez sélectionner une course et un cheval gagnant')
+      return
+    }
+
+    if (!confirm(`Confirmer ${selectedWinner} comme gagnant ?\nCela marquera la course comme terminée SANS traiter les paris.`)) return
+
+    try {
+      const response = await fetch('/api/admin/race-winner', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          raceId: selectedRaceForWinner, 
+          winnerHorseName: selectedWinner 
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`${data.message}\n\n${data.warning}`)
+        setSelectedRaceForWinner('')
+        setSelectedWinner('')
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur confirmation gagnant:', error)
+      alert('Erreur lors de la confirmation')
+    }
+  }
+
+  const modifyRaceWinner = async () => {
+    if (!selectedRaceForWinner || !selectedWinner) {
+      alert('Veuillez sélectionner une course et un nouveau cheval gagnant')
+      return
+    }
+
+    if (!confirm(`Modifier le gagnant pour ${selectedWinner} ?\nCela annulera les anciens paris et nécessitera un retraitement.`)) return
+
+    try {
+      const response = await fetch('/api/admin/race-winner', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          raceId: selectedRaceForWinner, 
+          newWinnerHorseName: selectedWinner 
+        })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`${data.message}\n\nAncien gagnant: ${data.race.oldWinner}\nNouveau gagnant: ${data.race.newWinner}\n\n${data.warning}`)
+        setSelectedRaceForWinner('')
+        setSelectedWinner('')
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur modification gagnant:', error)
+      alert('Erreur lors de la modification')
+    }
+  }
+
+  const processBets = async (raceId: string, raceName: string) => {
+    if (!confirm(`Traiter les paris pour "${raceName}" ?\nCela distribuera les gains et ne pourra pas être annulé.`)) return
+
+    try {
+      const response = await fetch('/api/admin/race-winner', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ raceId })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`${data.message}\n\nCourse: ${data.results.race}\nGagnant: ${data.results.winner}\nParis gagnants: ${data.results.winners}/${data.results.totalBets}\nGains distribués: ${data.results.totalWinnings} points`)
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur traitement paris:', error)
+      alert('Erreur lors du traitement des paris')
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <SignedOut>
@@ -560,6 +658,82 @@ export default function AdminPage() {
                     </form>
                   </div>
 
+                  {/* Gestion des gagnants */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      🏆 Gestion des gagnants
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                      <div>
+                        <label className="form-label">Course</label>
+                        <select
+                          value={selectedRaceForWinner}
+                          onChange={(e) => {
+                            setSelectedRaceForWinner(e.target.value)
+                            setSelectedWinner('')
+                          }}
+                          className="form-select"
+                        >
+                          <option value="">Sélectionner une course</option>
+                          {races.filter(race => race.horses && race.horses.length > 0).map((race) => (
+                            <option key={race._id} value={race._id}>
+                              {race.name} - {race.finished ? `Terminée (${race.winner})` : 'En cours'}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Cheval gagnant</label>
+                        <select
+                          value={selectedWinner}
+                          onChange={(e) => setSelectedWinner(e.target.value)}
+                          className="form-select"
+                          disabled={!selectedRaceForWinner}
+                        >
+                          <option value="">Sélectionner le gagnant</option>
+                          {selectedRaceForWinner && races.find(race => race._id === selectedRaceForWinner)?.horses?.map((horse) => (
+                            <option key={horse.name} value={horse.name}>
+                              {horse.name} (par {horse.userName})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div className="flex items-end gap-2">
+                        <button
+                          onClick={confirmRaceWinner}
+                          disabled={!selectedRaceForWinner || !selectedWinner}
+                          className="btn btn-primary flex-1"
+                        >
+                          ✅ Confirmer
+                        </button>
+                        <button
+                          onClick={modifyRaceWinner}
+                          disabled={!selectedRaceForWinner || !selectedWinner}
+                          className="btn bg-yellow-600 hover:bg-yellow-700 text-white flex-1"
+                        >
+                          ✏️ Modifier
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-start gap-3">
+                        <div className="text-blue-500 text-xl">ℹ️</div>
+                        <div className="text-sm text-blue-700">
+                          <p className="font-medium mb-2">Processus de gestion des courses :</p>
+                          <ol className="list-decimal ml-4 space-y-1">
+                            <li><strong>Confirmer</strong> : Marque la course comme terminée SANS traiter les paris</li>
+                            <li><strong>Modifier</strong> : Change le gagnant et annule les anciens paris</li>
+                            <li><strong>Traiter</strong> : Distribue les gains (bouton dans la liste des courses)</li>
+                          </ol>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Liste des courses */}
                   <div className="card">
                     <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -620,7 +794,7 @@ export default function AdminPage() {
                                   )}
                                 </td>
                                 <td>
-                                  <div className="flex gap-2">
+                                  <div className="flex gap-1 flex-wrap">
                                     {!race.finished && race.horses && race.horses.length > 0 && (
                                       <select
                                         onChange={(e) => e.target.value && finishRace(race._id, e.target.value)}
@@ -634,6 +808,20 @@ export default function AdminPage() {
                                           </option>
                                         ))}
                                       </select>
+                                    )}
+                                    {race.finished && race.winner && !race.betsProcessed && (
+                                      <button
+                                        onClick={() => processBets(race._id, race.name)}
+                                        className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded"
+                                        title="Traiter les paris et distribuer les gains"
+                                      >
+                                        💰 Traiter
+                                      </button>
+                                    )}
+                                    {race.finished && race.betsProcessed && (
+                                      <span className="text-xs text-green-600 px-2 py-1 bg-green-100 rounded">
+                                        ✅ Traité
+                                      </span>
                                     )}
                                     <button
                                       onClick={() => deleteRace(race._id)}
