@@ -72,6 +72,7 @@ export default function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [password, setPassword] = useState('')
   const [showError, setShowError] = useState(false)
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true)
   const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users' | 'guests' | 'reset'>('races')
   const [races, setRaces] = useState<Race[]>([])
   const [bets, setBets] = useState<Bet[]>([])
@@ -118,17 +119,69 @@ export default function AdminPage() {
     if (password === 'Arturia808*') {
       setIsAuthenticated(true)
       setShowError(false)
+      // Sauvegarder la session admin dans localStorage avec expiration (24h)
+      const expiration = new Date()
+      expiration.setTime(expiration.getTime() + (24 * 60 * 60 * 1000)) // 24 heures
+      localStorage.setItem('adminSession', JSON.stringify({
+        authenticated: true,
+        expires: expiration.getTime()
+      }))
     } else {
       setShowError(true)
       setPassword('')
     }
   }
 
+  const logout = () => {
+    setIsAuthenticated(false)
+    localStorage.removeItem('adminSession')
+  }
+
+  // Vérifier la session au chargement de la page
+  useEffect(() => {
+    const checkAdminSession = () => {
+      try {
+        const savedSession = localStorage.getItem('adminSession')
+        if (savedSession) {
+          const session = JSON.parse(savedSession)
+          const now = new Date().getTime()
+          
+          if (session.authenticated && session.expires > now) {
+            setIsAuthenticated(true)
+          } else {
+            // Session expirée, la supprimer
+            localStorage.removeItem('adminSession')
+          }
+        }
+      } catch (error) {
+        console.error('Erreur vérification session admin:', error)
+        localStorage.removeItem('adminSession')
+      } finally {
+        setIsLoadingAuth(false)
+      }
+    }
+
+    checkAdminSession()
+  }, [])
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchAdminData()
     }
   }, [isAuthenticated])
+
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-pulse">
+            <div className="text-4xl mb-4">⏳</div>
+            <p className="text-gray-600">Vérification de la session...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (!isAuthenticated) {
     return (
@@ -517,7 +570,16 @@ export default function AdminPage() {
       <SignedIn>
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
-          <div className="text-center mb-8 animate-fadeIn">
+          <div className="text-center mb-8 animate-fadeIn relative">
+            <div className="absolute top-0 right-0">
+              <button
+                onClick={logout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                title="Se déconnecter du panneau admin"
+              >
+                🚪 Déconnexion
+              </button>
+            </div>
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
               🔧 Panneau d&apos;Administration
             </h1>
