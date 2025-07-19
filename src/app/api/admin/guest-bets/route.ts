@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import getClientPromise from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 
 // POST - Créer un pari pour un utilisateur invité
 export async function POST(request: Request) {
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     // Vérifier que la course existe et n'est pas terminée
-    const race = await db.collection('courses').findOne({ _id: raceId })
+    const race = await db.collection('courses').findOne({ _id: new ObjectId(raceId) })
     if (!race) {
       return NextResponse.json({ error: 'Course non trouvée' }, { status: 404 })
     }
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
     // Vérifier que l'utilisateur n'a pas déjà parié sur cette course
     const existingBet = await db.collection('bets').findOne({
       userId: guestUserId,
-      raceId: raceId
+      raceId: new ObjectId(raceId)
     })
 
     if (existingBet) {
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
     // Créer le pari
     const newBet = {
       userId: guestUserId,
-      raceId: raceId,
+      raceId: new ObjectId(raceId),
       raceName: race.name,
       horseName: horseName,
       amount: amount,
@@ -208,7 +209,7 @@ export async function DELETE(request: Request) {
     }
 
     // Vérifier que la course n'est pas terminée
-    const race = await db.collection('courses').findOne({ _id: bet.raceId })
+    const race = await db.collection('courses').findOne({ _id: new ObjectId(bet.raceId) })
     if (race?.finished) {
       return NextResponse.json({ 
         error: 'Impossible d\'annuler un pari sur une course terminée' 
