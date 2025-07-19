@@ -9,7 +9,7 @@ type Race = {
   name: string
   date: string
   slots: number
-  horses: Array<{ name: string; userId: string; userName: string }>
+  horses: Array<{ name: string; userId: string; userName: string; slotNumber?: number }>
   finished: boolean
   winner?: string
   format: 'long' | 'fun' | 'court'
