@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     }
 
     // Vérifier que le cheval existe dans la course
-    const horse = race.horses?.find((h: any) => h.name === horseName)
+    const horse = race.horses?.find((h: { name: string }) => h.name === horseName)
     if (!horse) {
       return NextResponse.json({ 
         error: 'Cheval non trouvé dans cette course' 
@@ -132,7 +132,7 @@ export async function GET(request: Request) {
     const client = await getClientPromise()
     const db = client.db('cheval-bet')
 
-    let query: any = {}
+    const query: Record<string, unknown> = {}
     
     if (guestUserId) {
       // Paris pour un utilisateur invité spécifique

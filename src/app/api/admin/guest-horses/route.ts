@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     }
 
     // Vérifier que l'utilisateur n'a pas déjà un cheval dans cette course
-    const existingHorse = race.horses?.find((h: any) => h.userId === guestUserId)
+    const existingHorse = race.horses?.find((h: { userId: string }) => h.userId === guestUserId)
     if (existingHorse) {
       return NextResponse.json({ 
         error: 'Cet utilisateur a déjà un cheval dans cette course' 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     // Vérifier que le nom du cheval n'est pas déjà pris
-    const existingHorseName = race.horses?.find((h: any) => h.name.toLowerCase() === horseName.toLowerCase())
+    const existingHorseName = race.horses?.find((h: { name: string }) => h.name.toLowerCase() === horseName.toLowerCase())
     if (existingHorseName) {
       return NextResponse.json({ 
         error: 'Ce nom de cheval est déjà pris dans cette course' 
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
     let availableSlot = slotNumber
     if (!availableSlot || availableSlot < 1 || availableSlot > race.slots) {
       // Chercher le premier slot disponible
-      const takenSlots = race.horses?.map((h: any) => h.slotNumber) || []
+      const takenSlots = race.horses?.map((h: { slotNumber: number }) => h.slotNumber) || []
       for (let i = 1; i <= race.slots; i++) {
         if (!takenSlots.includes(i)) {
           availableSlot = i
@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     }
 
     // Vérifier que le slot choisi n'est pas déjà pris
-    const slotTaken = race.horses?.find((h: any) => h.slotNumber === availableSlot)
+    const slotTaken = race.horses?.find((h: { slotNumber: number }) => h.slotNumber === availableSlot)
     if (slotTaken) {
       return NextResponse.json({ 
         error: `Le slot ${availableSlot} est déjà pris` 
@@ -133,7 +133,7 @@ export async function GET(request: Request) {
     const client = await getClientPromise()
     const db = client.db('cheval-bet')
 
-    let query: any = {}
+    let query: Record<string, unknown> = {}
     
     if (raceId) {
       query._id = new ObjectId(raceId)
@@ -142,7 +142,7 @@ export async function GET(request: Request) {
     const races = await db.collection('courses').find(query).toArray()
 
     // Filtrer les chevaux des utilisateurs invités
-    const guestHorses: any[] = []
+    const guestHorses: unknown[] = []
     
     for (const race of races) {
       if (race.horses) {
@@ -209,7 +209,7 @@ export async function DELETE(request: Request) {
     }
 
     // Trouver le cheval de l'utilisateur invité
-    const horseToRemove = race.horses?.find((h: any) => h.userId === guestUserId)
+    const horseToRemove = race.horses?.find((h: { userId: string; slotNumber: number }) => h.userId === guestUserId)
     if (!horseToRemove) {
       return NextResponse.json({ 
         error: 'Aucun cheval trouvé pour cet utilisateur dans cette course' 
