@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     await db.collection('courses').updateOne(
       { _id: new ObjectId(raceId) },
       { 
-        $push: { horses: newHorse } as { horses: typeof newHorse },
+        $push: { horses: newHorse } as any,
         $set: { 
           [`slotsArray.${availableSlot - 1}.taken`]: true,
           [`slotsArray.${availableSlot - 1}.horseName`]: horseName.trim()
