@@ -5,38 +5,17 @@ import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
 import { useState, useEffect } from 'react'
 import PointsPopup from '@/components/PointsPopup'
 
-type Player = {
-  id: string
-  name: string
-  points: number
-  position: number
-}
-
 export default function HomePage() {
   const { isSignedIn } = useUser()
-  const [topPlayers, setTopPlayers] = useState<Player[]>([])
   const [showPointsPopup, setShowPointsPopup] = useState(false)
   const [bonusPoints, setBonusPoints] = useState(0)
   const [instagramBonusClaimed, setInstagramBonusClaimed] = useState(false)
 
   useEffect(() => {
     if (isSignedIn) {
-      fetchTopPlayers()
       checkInstagramBonusStatus()
     }
   }, [isSignedIn])
-
-  async function fetchTopPlayers() {
-    try {
-      const res = await fetch('/api/scores')
-      if (res.ok) {
-        const data = await res.json()
-        setTopPlayers(data.topPlayers)
-      }
-    } catch (error) {
-      console.error('Erreur récupération scores:', error)
-    }
-  }
 
   async function checkInstagramBonusStatus() {
     try {
