@@ -39,11 +39,11 @@ export async function POST(request: NextRequest) {
     // Filtrer les paris gagnants
     const winningBets = bets.filter(bet => bet.horseName === winnerHorseName)
 
-    // Calculer et distribuer les gains (double des points pariés)
+    // Calculer et distribuer les gains selon les cotes de chaque pari
     const usersCollection = db.collection('users')
     
     for (const bet of winningBets) {
-      const winnings = bet.amount * 2
+      const winnings = bet.amount * (bet.cote || 2) // Utiliser la cote sauvegardée ou 2 par défaut
       await usersCollection.updateOne(
         { userId: bet.userId },
         { $inc: { points: winnings } }
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Marquer les paris gagnants avec les gains
     for (const bet of winningBets) {
-      const winnings = bet.amount * 2
+      const winnings = bet.amount * (bet.cote || 2) // Utiliser la cote sauvegardée
       await db.collection('bets').updateOne(
         { _id: bet._id },
         { $set: { won: true, winnings: winnings } }
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ 
       message: `Course terminée ! Cheval gagnant: ${winnerHorseName}`,
       winningBets: winningBets.length,
-      totalWinnings: winningBets.reduce((sum, bet) => sum + (bet.amount * 2), 0)
+      totalWinnings: winningBets.reduce((sum, bet) => sum + (bet.amount * (bet.cote || 2)), 0)
     })
   } catch (error) {
     console.error('POST /api/race/finish error:', error)
