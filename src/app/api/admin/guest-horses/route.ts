@@ -96,10 +96,11 @@ export async function POST(request: Request) {
     }
 
     // Ajouter le cheval à la course
-    await db.collection('courses').updateOne(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db.collection('courses') as any).updateOne(
       { _id: new ObjectId(raceId) },
       { 
-        $push: { horses: newHorse } as any,
+        $push: { horses: newHorse },
         $set: { 
           [`slotsArray.${availableSlot - 1}.taken`]: true,
           [`slotsArray.${availableSlot - 1}.horseName`]: horseName.trim()
