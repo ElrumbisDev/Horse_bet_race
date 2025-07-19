@@ -54,121 +54,6 @@ export default function ReglesPage() {
           {/* Les 3 types de courses */}
           <div className="space-y-12">
             
-            {/* Galop fou */}
-            <div className="card bg-white shadow-lg">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  🏇
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800">Le Galop fou</h2>
-                  <p className="text-red-600 font-medium">Course sur bâton</p>
-                </div>
-              </div>
-              
-              <div className="bg-red-50 p-6 rounded-lg mb-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
-                <p className="text-gray-700 text-lg mb-4">
-                  Les participants courent avec un <strong>bâton entre les jambes</strong>
-                </p>
-                <p className="text-gray-700">
-                  C&apos;est la course la plus rapide et la plus folle ! Préparez-vous à galoper !
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-green-800 mb-3">✅ Règles obligatoires</h4>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600 font-bold">•</span>
-                      <span>Le bâton doit <strong>toujours rester entre les jambes</strong></span>
-                    </li>
-
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600 font-bold">•</span>
-                      <span>Le <strong>plus rapide gagne</strong> !</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-yellow-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-yellow-800 mb-3">⚠️ Règles spéciales</h4>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-red-600 font-bold">•</span>
-                      <span><strong>Disqualification</strong> si le bâton sort d&apos;entre les jambes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-yellow-600 font-bold">•</span>
-                      <span>Droit de pousser ? <em>(À définir selon l&apos;ambiance)</em></span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Trot monté */}
-            <div className="card bg-white shadow-lg">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  🐎
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-800">Le Trot monté</h2>
-                  <p className="text-yellow-600 font-medium">Course en binôme : cheval + jockey</p>
-                </div>
-              </div>
-              
-              <div className="bg-yellow-50 p-6 rounded-lg mb-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
-                <p className="text-gray-700 text-lg mb-4">
-                  Les participants forment des <strong>binômes</strong>. L&apos;un joue le cheval (avec masque), l&apos;autre le jockey sur son dos.
-                </p>
-                <p className="text-gray-700">
-                  Travail d&apos;équipe et endurance sont les clés de la victoire !
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-blue-800 mb-3">👥 Formation des équipes</h4>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold">•</span>
-                      <span><strong>Binômes obligatoires</strong></span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold">•</span>
-                      <span>Le &quot;cheval&quot; porte le <strong>masque</strong></span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-blue-600 font-bold">•</span>
-                      <span>Le &quot;jockey&quot; monte <strong>sur le dos</strong> du cheval</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-green-800 mb-3">🏆 Victoire</h4>
-                  <ul className="space-y-2 text-gray-700">
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600 font-bold">•</span>
-                      <span>Le <strong>premier binôme</strong> qui passe la ligne gagne</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-green-600 font-bold">•</span>
-                      <span>Les <strong>deux participants</strong> doivent franchir ensemble</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-orange-600 font-bold">•</span>
-                      <span>Course d&apos;<strong>endurance</strong> et de coordination</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
             {/* Hobby Horse */}
             <div className="card bg-white shadow-lg">
               <div className="flex items-center gap-4 mb-6">
@@ -242,6 +127,121 @@ export default function ReglesPage() {
                 <p className="text-gray-600 text-sm mt-2 text-center">
                   <em>Simple, fun et spectaculaire ! 😄</em>
                 </p>
+              </div>
+            </div>
+
+            {/* Galop fou */}
+            <div className="card bg-white shadow-lg">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  🏇
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">Le Galop fou</h2>
+                  <p className="text-red-600 font-medium">Course simple avec masque</p>
+                </div>
+              </div>
+              
+              <div className="bg-red-50 p-6 rounded-lg mb-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
+                <p className="text-gray-700 text-lg mb-4">
+                  Course simple avec un <strong>masque sur la tête</strong> qui limite la vision !
+                </p>
+                <p className="text-gray-700">
+                  Le plus rapide et le plus chanceux gagne !
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-bold text-green-800 mb-3">🎭 Équipement requis</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">•</span>
+                      <span><strong>Masque :</strong> fourni par l&apos;organisation</span>
+                    </li>
+
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">•</span>
+                      <span>Le <strong>plus rapide gagne</strong> !</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <h4 className="font-bold text-yellow-800 mb-3">⚠️ Règles spéciales</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-red-600 font-bold">•</span>
+                      <span><strong>Interdiction</strong> d&apos;enlever le masque pendant la course</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-600 font-bold">•</span>
+                      <span>Attention aux <strong>obstacles</strong> sur le parcours !</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Trot monté */}
+            <div className="card bg-white shadow-lg">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+                  🐎
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">Le Trot monté</h2>
+                  <p className="text-yellow-600 font-medium">Course en binôme : cheval + jockey</p>
+                </div>
+              </div>
+              
+              <div className="bg-yellow-50 p-6 rounded-lg mb-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
+                <p className="text-gray-700 text-lg mb-4">
+                  Les participants forment des <strong>binômes</strong>. L&apos;un joue le cheval (avec masque), l&apos;autre le jockey sur son dos.
+                </p>
+                <p className="text-gray-700">
+                  Travail d&apos;équipe et endurance sont les clés de la victoire !
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h4 className="font-bold text-blue-800 mb-3">👥 Formation des équipes</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 font-bold">•</span>
+                      <span><strong>Binômes obligatoires</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 font-bold">•</span>
+                      <span>Le &quot;cheval&quot; porte le <strong>masque</strong></span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-600 font-bold">•</span>
+                      <span>Le &quot;jockey&quot; monte <strong>sur le dos</strong> du cheval</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <h4 className="font-bold text-green-800 mb-3">🏆 Victoire</h4>
+                  <ul className="space-y-2 text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">•</span>
+                      <span>Le <strong>premier binôme</strong> qui passe la ligne gagne</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">•</span>
+                      <span>Les <strong>deux participants</strong> doivent franchir ensemble</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-orange-600 font-bold">•</span>
+                      <span>Course d&apos;<strong>endurance</strong> et de coordination</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
