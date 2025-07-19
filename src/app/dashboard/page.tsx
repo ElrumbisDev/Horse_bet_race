@@ -450,7 +450,7 @@ export default function DashboardPage() {
                                 }`}>
                                   {race.format === 'long' && '🏇 Galop fou'}
                                   {race.format === 'court' && '🐎 Trot monté'}
-                                  {race.format === 'fun' && '🏟️ Paris Longchamp'}
+                                  {race.format === 'fun' && '🦄 Hobby Horse'}
                                 </span>
                               )}
                             </div>
@@ -633,7 +633,7 @@ export default function DashboardPage() {
                                 }`}>
                                   {race.format === 'long' && '🏇 Galop fou'}
                                   {race.format === 'court' && '🐎 Trot monté'}
-                                  {race.format === 'fun' && '🏟️ Paris Longchamp'}
+                                  {race.format === 'fun' && '🦄 Hobby Horse'}
                                 </span>
                               )}
                             </div>

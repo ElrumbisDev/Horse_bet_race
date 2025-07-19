@@ -248,7 +248,7 @@ export default function AdminPage() {
   const getFormatBadge = (format: Race['format']) => {
     const badges = {
       long: <span className="format-badge format-long">🏇 Galop fou</span>,
-      fun: <span className="format-badge format-fun">🏟️ Paris Longchamp</span>,
+      fun: <span className="format-badge format-fun">🦄 Hobby Horse</span>,
       court: <span className="format-badge format-court">🐎 Trot monté</span>
     }
     return badges[format]
@@ -644,7 +644,7 @@ export default function AdminPage() {
                           className="form-select"
                           required
                         >
-                          <option value="fun">🏟️ Paris Longchamp</option>
+                          <option value="fun">🦄 Hobby Horse</option>
                           <option value="court">🐎 Trot monté</option>
                           <option value="long">🏇 Galop fou</option>
                         </select>

@@ -169,82 +169,78 @@ export default function ReglesPage() {
               </div>
             </div>
 
-            {/* Paris Longchamp */}
+            {/* Hobby Horse */}
             <div className="card bg-white shadow-lg">
               <div className="flex items-center gap-4 mb-6">
                 <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  🏟️
+                  🦄
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-800">Le Paris Longchamp</h2>
-                  <p className="text-green-600 font-medium">Course avec épreuve de précision</p>
+                  <h2 className="text-3xl font-bold text-gray-800">Le Hobby Horse</h2>
+                  <p className="text-green-600 font-medium">Course sur bâton simple</p>
                 </div>
               </div>
               
               <div className="bg-green-50 p-6 rounded-lg mb-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">🎯 Principe</h3>
                 <p className="text-gray-700 text-lg mb-4">
-                  Course en binômes avec une <strong>épreuve de lancer</strong> ! Stratégie et précision sont essentielles.
+                  Course individuelle sur <strong>bâton simple</strong> ! Simplicité et plaisir sont au rendez-vous.
                 </p>
                 <p className="text-gray-700">
-                  Le coureur ne peut avancer que si le lanceur réussit son tir !
+                  Chaque participant court avec son bâton-cheval personnalisé !
                 </p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="bg-purple-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-purple-800 mb-3">🎯 Rôles dans l&apos;équipe</h4>
+                  <h4 className="font-bold text-purple-800 mb-3">🦄 Équipement requis</h4>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 font-bold">•</span>
-                      <span><strong>Le Lanceur :</strong> doit marquer des paniers</span>
+                      <span><strong>Bâton-cheval :</strong> fourni par l&apos;organisation</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 font-bold">•</span>
-                      <span><strong>Le Coureur :</strong> avance selon les réussites</span>
+                      <span><strong>Tenue :</strong> libre mais confortable</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-purple-600 font-bold">•</span>
-                      <span>Lancer une <strong>balle dans un seau</strong></span>
+                      <span>Prévoir de <strong>l&apos;énergie</strong> et de la bonne humeur !</span>
                     </li>
                   </ul>
                 </div>
 
                 <div className="bg-orange-50 p-4 rounded-lg">
-                  <h4 className="font-bold text-orange-800 mb-3">⚡ Règle d&apos;avancement</h4>
+                  <h4 className="font-bold text-orange-800 mb-3">⚡ Règles de la course</h4>
                   <ul className="space-y-2 text-gray-700">
                     <li className="flex items-start gap-2">
                       <span className="text-orange-600 font-bold">•</span>
-                      <span><strong>Tant que la balle n&apos;est pas dans le seau</strong></span>
+                      <span><strong>Course simple</strong> : du point A au point B</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-red-600 font-bold">•</span>
-                      <span>Le coureur <strong>ne peut pas avancer</strong></span>
+                      <span className="text-blue-600 font-bold">•</span>
+                      <span>Courir en <strong>chevauchant le bâton</strong></span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-green-600 font-bold">•</span>
-                      <span>Panier réussi = <strong>avancement autorisé</strong></span>
+                      <span>Premier arrivé = <strong>gagnant</strong> !</span>
                     </li>
                   </ul>
                 </div>
               </div>
 
               <div className="bg-gray-50 p-4 rounded-lg mt-6">
-                <h4 className="font-bold text-gray-800 mb-3">🎬 Inspiration vidéo</h4>
+                <h4 className="font-bold text-gray-800 mb-3">🦄 Esprit Hobby Horse</h4>
                 <p className="text-gray-700 mb-3">
-                  Pour mieux comprendre l&apos;esprit de cette course, regardez cette vidéo :
+                  Une course simple et amusante inspirée du hobby horse traditionnel !
                 </p>
-                <a 
-                  href="https://www.youtube.com/watch?v=q2bCQQFIt-I" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-red-600 hover:text-red-700 font-medium"
-                >
-                  🎥 Voir la vidéo d&apos;inspiration
-                  <span>→</span>
-                </a>
-                <p className="text-gray-600 text-sm mt-2">
-                  <em>Attention : ça risque de gueuler dans tous les sens ! 😄</em>
+                <div className="text-center">
+                  <span className="inline-flex items-center gap-2 text-purple-600 font-medium">
+                    🎠 Course accessible à tous les niveaux
+                  </span>
+                </div>
+                <p className="text-gray-600 text-sm mt-2 text-center">
+                  <em>Simple, fun et spectaculaire ! 😄</em>
                 </p>
               </div>
             </div>
@@ -261,7 +257,7 @@ export default function ReglesPage() {
               <div className="grid md:grid-cols-3 gap-6 text-left">
                 <div className="bg-white p-4 rounded-lg shadow">
                   <h3 className="font-bold text-blue-800 mb-2">1. Choisissez votre course</h3>
-                  <p className="text-gray-600 text-sm">Galop fou, Trot monté ou Paris Longchamp ?</p>
+                  <p className="text-gray-600 text-sm">Galop fou, Trot monté ou Hobby Horse ?</p>
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow">
                   <h3 className="font-bold text-green-800 mb-2">2. Sélectionnez votre cheval</h3>
