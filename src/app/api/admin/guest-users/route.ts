@@ -183,7 +183,8 @@ export async function DELETE(request: Request) {
     await db.collection('bets').deleteMany({ userId: guestUserId })
 
     // Retirer l'utilisateur invité de toutes les courses
-    await db.collection('courses').updateMany(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db.collection('courses') as any).updateMany(
       { 'horses.userId': guestUserId },
       { 
         $pull: { horses: { userId: guestUserId } },
