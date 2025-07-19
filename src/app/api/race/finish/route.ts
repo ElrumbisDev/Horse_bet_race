@@ -33,21 +33,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Ce cheval n\'est pas inscrit dans cette course' }, { status: 400 })
     }
 
-    // Récupérer tous les paris sur cette course
-    const bets = await db.collection('bets').find({ raceId }).toArray()
+    // Récupérer tous les paris sur cette course (les paris stockent raceId comme string)
+    const regularBets = await db.collection('bets').find({ raceId: raceId }).toArray()
+    const guestBets = await db.collection('guest-bets').find({ raceId: new ObjectId(raceId) }).toArray()
+    const allBets = [...regularBets, ...guestBets]
+    
+    console.log(`Found ${regularBets.length} regular bets and ${guestBets.length} guest bets for race ${raceId}`)
     
     // Filtrer les paris gagnants
-    const winningBets = bets.filter(bet => bet.horseName === winnerHorseName)
+    const winningBets = allBets.filter(bet => bet.horseName === winnerHorseName)
+    
+    console.log(`Found ${winningBets.length} winning bets for horse ${winnerHorseName}`)
+    console.log('Winning bets:', winningBets.map(bet => ({ user: bet.userId, amount: bet.amount, cote: bet.cote })))
 
     // Calculer et distribuer les gains selon les cotes de chaque pari
     const usersCollection = db.collection('users')
     
     for (const bet of winningBets) {
       const winnings = bet.amount * (bet.cote || 2) // Utiliser la cote sauvegardée ou 2 par défaut
-      await usersCollection.updateOne(
-        { userId: bet.userId },
-        { $inc: { points: winnings } }
-      )
+      console.log(`Awarding ${winnings} points to user ${bet.userId || bet.guestUserId} (bet: ${bet.amount} x ${bet.cote || 2})`)
+      
+      let updateResult
+      if (bet.guestUserId) {
+        // Paris d'utilisateur invité
+        updateResult = await usersCollection.updateOne(
+          { userId: bet.guestUserId, userType: 'guest' },
+          { $inc: { points: winnings } }
+        )
+      } else {
+        // Paris d'utilisateur régulier
+        updateResult = await usersCollection.updateOne(
+          { userId: bet.userId },
+          { $inc: { points: winnings } }
+        )
+      }
+      
+      console.log(`Update result for ${bet.userId || bet.guestUserId}:`, updateResult.modifiedCount > 0 ? 'SUCCESS' : 'FAILED')
     }
 
     // Marquer la course comme terminée
@@ -63,8 +84,8 @@ export async function POST(request: NextRequest) {
     )
 
     // Marquer tous les paris de cette course comme terminés
-    await db.collection('bets').updateMany(
-      { raceId },
+    const regularBetsUpdateResult = await db.collection('bets').updateMany(
+      { raceId: raceId },
       { 
         $set: { 
           finished: true,
@@ -72,26 +93,58 @@ export async function POST(request: NextRequest) {
         }
       }
     )
+    
+    const guestBetsUpdateResult = await db.collection('guest-bets').updateMany(
+      { raceId: new ObjectId(raceId) },
+      { 
+        $set: { 
+          finished: true,
+          winner: winnerHorseName
+        }
+      }
+    )
+    
+    console.log(`Updated ${regularBetsUpdateResult.modifiedCount} regular bets and ${guestBetsUpdateResult.modifiedCount} guest bets as finished`)
 
     // Marquer les paris gagnants avec les gains
     for (const bet of winningBets) {
       const winnings = bet.amount * (bet.cote || 2) // Utiliser la cote sauvegardée
-      await db.collection('bets').updateOne(
-        { _id: bet._id },
-        { $set: { won: true, winnings: winnings } }
-      )
+      
+      if (bet.guestUserId) {
+        // Pari d'utilisateur invité
+        await db.collection('guest-bets').updateOne(
+          { _id: bet._id },
+          { $set: { won: true, winnings: winnings } }
+        )
+      } else {
+        // Pari d'utilisateur régulier
+        await db.collection('bets').updateOne(
+          { _id: bet._id },
+          { $set: { won: true, winnings: winnings } }
+        )
+      }
     }
 
     // Marquer les paris perdants
-    await db.collection('bets').updateMany(
-      { raceId, horseName: { $ne: winnerHorseName } },
+    const losingRegularBetsResult = await db.collection('bets').updateMany(
+      { raceId: raceId, horseName: { $ne: winnerHorseName } },
       { $set: { won: false, winnings: 0 } }
     )
+    
+    const losingGuestBetsResult = await db.collection('guest-bets').updateMany(
+      { raceId: new ObjectId(raceId), horseName: { $ne: winnerHorseName } },
+      { $set: { won: false, winnings: 0 } }
+    )
+    
+    console.log(`Updated ${losingRegularBetsResult.modifiedCount} regular bets and ${losingGuestBetsResult.modifiedCount} guest bets as losing`)
 
     return NextResponse.json({ 
       message: `Course terminée ! Cheval gagnant: ${winnerHorseName}`,
       winningBets: winningBets.length,
-      totalWinnings: winningBets.reduce((sum, bet) => sum + (bet.amount * (bet.cote || 2)), 0)
+      totalWinnings: winningBets.reduce((sum, bet) => sum + (bet.amount * (bet.cote || 2)), 0),
+      totalBets: allBets.length,
+      regularBets: regularBets.length,
+      guestBets: guestBets.length
     })
   } catch (error) {
     console.error('POST /api/race/finish error:', error)

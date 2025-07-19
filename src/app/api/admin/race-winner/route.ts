@@ -120,7 +120,7 @@ export async function PUT(request: Request) {
     if (race.betsProcessed) {
       // Annuler les anciens gains/pertes
       const bets = await db.collection('bets').find({ 
-        raceId: new ObjectId(raceId) 
+        raceId: raceId 
       }).toArray()
 
       for (const bet of bets) {
@@ -215,10 +215,12 @@ export async function PATCH(request: Request) {
       }, { status: 400 })
     }
 
-    // Traiter tous les paris de cette course
+    // Traiter tous les paris de cette course (les paris stockent raceId comme string)
     const bets = await db.collection('bets').find({ 
-      raceId: new ObjectId(raceId) 
+      raceId: raceId 
     }).toArray()
+    
+    console.log(`Found ${bets.length} bets for race ${raceId} in admin processing`)
 
     let totalWinners = 0
     let totalLosers = 0
