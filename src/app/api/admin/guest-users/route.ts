@@ -134,7 +134,7 @@ export async function PUT(request: Request) {
     const client = await getClientPromise()
     const db = client.db('cheval-bet')
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       updatedAt: new Date()
     }
 

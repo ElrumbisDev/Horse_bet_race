@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { currentUser } from '@clerk/nextjs/server'
 import getClientPromise from '@/lib/mongodb'
 
-export async function POST(request: Request) {
+export async function POST() {
   try {
     const user = await currentUser()
     

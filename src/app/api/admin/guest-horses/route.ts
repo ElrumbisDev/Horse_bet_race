@@ -133,7 +133,7 @@ export async function GET(request: Request) {
     const client = await getClientPromise()
     const db = client.db('cheval-bet')
 
-    let query: Record<string, unknown> = {}
+    const query: Record<string, unknown> = {}
     
     if (raceId) {
       query._id = new ObjectId(raceId)
