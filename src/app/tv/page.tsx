@@ -13,6 +13,9 @@ interface Horse {
   name: string
   rider: string
   slot: number
+  odds?: number
+  totalBets?: number
+  betCount?: number
 }
 
 interface Race {
@@ -291,10 +294,10 @@ export default function TVPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-xl font-bold text-yellow-400">
-                          x{horse.odds}
+                          x{horse.odds || 2}
                         </div>
                         <div className="text-xs text-gray-400">
-                          {horse.betCount} paris
+                          {horse.betCount || 0} paris
                         </div>
                       </div>
                     </div>
