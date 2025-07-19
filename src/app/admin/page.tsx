@@ -815,7 +815,8 @@ export default function AdminPage() {
                               <th>Course</th>
                               <th>Format</th>
                               <th>Date</th>
-                              <th>Chevaux</th>
+                              <th>Slots</th>
+                              <th>Chevaux inscrits</th>
                               <th>Statut</th>
                               <th>Actions</th>
                             </tr>
@@ -844,6 +845,48 @@ export default function AdminPage() {
                                     <span className="text-gray-500">
                                       /{race.slots}
                                     </span>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="max-w-xs">
+                                    {race.horses && race.horses.length > 0 ? (
+                                      race.horses.length <= 4 ? (
+                                        // Affichage détaillé pour 4 chevaux ou moins
+                                        <div className="space-y-1">
+                                          {race.horses.map((horse, index) => (
+                                            <div key={index} className="text-xs bg-blue-50 border border-blue-200 rounded px-2 py-1">
+                                              <div className="flex items-center gap-2">
+                                                <span className="font-mono text-blue-600 w-6">#{horse.slotNumber || (index + 1)}</span>
+                                                <span className="font-medium text-gray-800">{horse.name}</span>
+                                              </div>
+                                              <div className="text-gray-600 text-xs">
+                                                par {horse.userName}
+                                              </div>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        // Affichage compact pour plus de 4 chevaux
+                                        <div className="text-xs">
+                                          <div className="font-medium text-gray-800 mb-1">
+                                            {race.horses.length} chevaux inscrits:
+                                          </div>
+                                          <div className="grid grid-cols-1 gap-1 max-h-32 overflow-y-auto">
+                                            {race.horses.map((horse, index) => (
+                                              <div key={index} className="flex items-center gap-1 text-xs">
+                                                <span className="font-mono text-blue-600 w-4">#{horse.slotNumber || (index + 1)}</span>
+                                                <span className="font-medium text-gray-700 truncate">{horse.name}</span>
+                                                <span className="text-gray-500 text-xs">({horse.userName})</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )
+                                    ) : (
+                                      <div className="text-gray-400 text-xs italic">
+                                        Aucun cheval inscrit
+                                      </div>
+                                    )}
                                   </div>
                                 </td>
                                 <td>
