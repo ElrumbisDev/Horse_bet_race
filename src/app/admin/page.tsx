@@ -42,6 +42,25 @@ type User = {
   winRate: number
 }
 
+type GuestUser = {
+  userId: string
+  userType: 'guest'
+  name: string
+  points: number
+  guestCode: string
+  createdBy: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+  expiresAt?: string
+  displayName: string
+  totalBets: number
+  wonBets: number
+  lostBets: number
+  totalBetAmount: number
+  winRate: number
+}
+
 // Fonction utilitaire pour afficher le nom utilisateur
 const formatUserName = (user: User) => {
   // L'API retourne déjà le bon displayName (username, firstName, ou email)
@@ -49,10 +68,14 @@ const formatUserName = (user: User) => {
 }
 
 export default function AdminPage() {
-  const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users'>('races')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [password, setPassword] = useState('')
+  const [showError, setShowError] = useState(false)
+  const [activeTab, setActiveTab] = useState<'races' | 'bets' | 'users' | 'guests' | 'reset'>('races')
   const [races, setRaces] = useState<Race[]>([])
   const [bets, setBets] = useState<Bet[]>([])
   const [users, setUsers] = useState<User[]>([])
+  const [guestUsers, setGuestUsers] = useState<GuestUser[]>([])
   const [loading, setLoading] = useState(true)
 
   // Formulaire nouvelle course
@@ -63,22 +86,97 @@ export default function AdminPage() {
     format: 'fun' as Race['format']
   })
 
+  // Formulaire nouvel utilisateur invité
+  const [newGuestUser, setNewGuestUser] = useState({
+    name: '',
+    initialPoints: 100
+  })
+
+  // Formulaire pari invité
+  const [newGuestBet, setNewGuestBet] = useState({
+    guestUserId: '',
+    raceId: '',
+    horseName: '',
+    amount: 10
+  })
+
+  // Formulaire cheval invité
+  const [newGuestHorse, setNewGuestHorse] = useState({
+    guestUserId: '',
+    raceId: '',
+    horseName: '',
+    slotNumber: 0
+  })
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (password === 'Arturia808*') {
+      setIsAuthenticated(true)
+      setShowError(false)
+    } else {
+      setShowError(true)
+      setPassword('')
+    }
+  }
+
   useEffect(() => {
-    fetchAdminData()
-  }, [])
+    if (isAuthenticated) {
+      fetchAdminData()
+    }
+  }, [isAuthenticated])
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="card bg-white p-8">
+            <h1 className="text-2xl font-bold text-center mb-6">🔒 Accès Admin</h1>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Mot de passe
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Entrez le mot de passe admin"
+                  required
+                />
+              </div>
+              {showError && (
+                <div className="text-red-600 text-sm text-center">
+                  Mot de passe incorrect
+                </div>
+              )}
+              <button
+                type="submit"
+                className="w-full btn btn-primary"
+              >
+                Accéder à l'admin
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const fetchAdminData = async () => {
     setLoading(true)
     try {
-      const [racesRes, betsRes, usersRes] = await Promise.all([
+      const [racesRes, betsRes, usersRes, guestUsersRes] = await Promise.all([
         fetch('/api/admin/races'),
         fetch('/api/admin/bets'),
-        fetch('/api/admin/users')
+        fetch('/api/admin/users'),
+        fetch('/api/admin/guest-users')
       ])
 
       if (racesRes.ok) setRaces(await racesRes.json())
       if (betsRes.ok) setBets(await betsRes.json())
       if (usersRes.ok) setUsers(await usersRes.json())
+      if (guestUsersRes.ok) setGuestUsers(await guestUsersRes.json())
     } catch (error) {
       console.error('Erreur chargement admin:', error)
     } finally {
@@ -158,6 +256,143 @@ export default function AdminPage() {
       : <span className="badge badge-danger">Perdu</span>
   }
 
+  const resetAllData = async () => {
+    if (!confirm('⚠️ ATTENTION ! Cette action va supprimer TOUTES les données : paris, courses, remettre tous les points à 100. Cette action est IRRÉVERSIBLE. Êtes-vous sûr ?')) return
+    
+    if (!confirm('Dernière confirmation : Voulez-vous vraiment réinitialiser TOUTES les données ?')) return
+
+    try {
+      const response = await fetch('/api/admin/reset', {
+        method: 'POST'
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`Réinitialisation terminée !\n- ${data.details.usersReset} utilisateurs réinitialisés\n- ${data.details.betsDeleted} paris supprimés\n- ${data.details.coursesDeleted} courses supprimées`)
+        await fetchAdminData()
+      } else {
+        alert('Erreur lors de la réinitialisation')
+      }
+    } catch (error) {
+      console.error('Erreur réinitialisation:', error)
+      alert('Erreur lors de la réinitialisation')
+    }
+  }
+
+  // Fonctions pour les utilisateurs invités
+  const createGuestUser = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/admin/guest-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGuestUser)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`Utilisateur invité créé !\nCode: ${data.guestUser.guestCode}\nNom: ${data.guestUser.name}`)
+        setNewGuestUser({ name: '', initialPoints: 100 })
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur création utilisateur invité:', error)
+      alert('Erreur lors de la création')
+    }
+  }
+
+  const createGuestBet = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/admin/guest-bets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGuestBet)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`Pari créé !\nPoints restants: ${data.remainingPoints}`)
+        setNewGuestBet({ guestUserId: '', raceId: '', horseName: '', amount: 10 })
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur création pari invité:', error)
+      alert('Erreur lors de la création du pari')
+    }
+  }
+
+  const createGuestHorse = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      const response = await fetch('/api/admin/guest-horses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newGuestHorse)
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        alert(`Cheval inscrit !\nNom: ${data.horse.name}\nSlot: ${data.horse.slotNumber}`)
+        setNewGuestHorse({ guestUserId: '', raceId: '', horseName: '', slotNumber: 0 })
+        await fetchAdminData()
+      } else {
+        const error = await response.json()
+        alert(`Erreur: ${error.error}`)
+      }
+    } catch (error) {
+      console.error('Erreur inscription cheval invité:', error)
+      alert('Erreur lors de l\'inscription du cheval')
+    }
+  }
+
+  const toggleGuestUserStatus = async (guestUserId: string, isActive: boolean) => {
+    try {
+      const response = await fetch('/api/admin/guest-users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestUserId, isActive: !isActive })
+      })
+
+      if (response.ok) {
+        await fetchAdminData()
+      } else {
+        alert('Erreur lors de la mise à jour')
+      }
+    } catch (error) {
+      console.error('Erreur toggle utilisateur invité:', error)
+      alert('Erreur lors de la mise à jour')
+    }
+  }
+
+  const deleteGuestUser = async (guestUserId: string, guestName: string) => {
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur invité "${guestName}" ?\nTous ses paris et chevaux seront également supprimés.`)) return
+
+    try {
+      const response = await fetch('/api/admin/guest-users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guestUserId })
+      })
+
+      if (response.ok) {
+        alert('Utilisateur invité supprimé avec succès')
+        await fetchAdminData()
+      } else {
+        alert('Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Erreur suppression utilisateur invité:', error)
+      alert('Erreur lors de la suppression')
+    }
+  }
+
   return (
     <div className="min-h-screen">
       <SignedOut>
@@ -225,6 +460,26 @@ export default function AdminPage() {
                 }`}
               >
                 👥 Utilisateurs ({users.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('guests')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  activeTab === 'guests'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                👤 Invités ({guestUsers.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('reset')}
+                className={`px-6 py-2 rounded-md font-medium transition-all ${
+                  activeTab === 'reset'
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}
+              >
+                🗑️ Réinitialiser
               </button>
             </div>
           </div>
@@ -533,6 +788,338 @@ export default function AdminPage() {
                       </table>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Tab Utilisateurs Invités */}
+              {activeTab === 'guests' && (
+                <div className="space-y-8">
+                  {/* Formulaire nouvel utilisateur invité */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      ➕ Créer un utilisateur invité
+                    </h2>
+                    <form onSubmit={createGuestUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="form-label">Nom de l'utilisateur</label>
+                        <input
+                          type="text"
+                          value={newGuestUser.name}
+                          onChange={(e) => setNewGuestUser({ ...newGuestUser, name: e.target.value })}
+                          className="form-input"
+                          placeholder="Nom du joueur"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Points initiaux</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="1000"
+                          value={newGuestUser.initialPoints}
+                          onChange={(e) => setNewGuestUser({ ...newGuestUser, initialPoints: Number(e.target.value) })}
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <button type="submit" className="btn btn-primary">
+                          👤 Créer l'utilisateur invité
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Gestion des paris invités */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      🎯 Créer un pari pour un invité
+                    </h2>
+                    <form onSubmit={createGuestBet} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="form-label">Utilisateur invité</label>
+                        <select
+                          value={newGuestBet.guestUserId}
+                          onChange={(e) => setNewGuestBet({ ...newGuestBet, guestUserId: e.target.value })}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Sélectionner un invité</option>
+                          {guestUsers.filter(gu => gu.isActive).map((guestUser) => (
+                            <option key={guestUser.userId} value={guestUser.userId}>
+                              {guestUser.name} ({guestUser.points} pts) - {guestUser.guestCode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Course</label>
+                        <select
+                          value={newGuestBet.raceId}
+                          onChange={(e) => {
+                            setNewGuestBet({ ...newGuestBet, raceId: e.target.value, horseName: '' })
+                          }}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Sélectionner une course</option>
+                          {races.filter(race => !race.finished && race.horses && race.horses.length > 0).map((race) => (
+                            <option key={race._id} value={race._id}>
+                              {race.name} ({race.horses?.length || 0} chevaux)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Cheval</label>
+                        <select
+                          value={newGuestBet.horseName}
+                          onChange={(e) => setNewGuestBet({ ...newGuestBet, horseName: e.target.value })}
+                          className="form-select"
+                          required
+                          disabled={!newGuestBet.raceId}
+                        >
+                          <option value="">Sélectionner un cheval</option>
+                          {newGuestBet.raceId && races.find(race => race._id === newGuestBet.raceId)?.horses?.map((horse) => (
+                            <option key={horse.name} value={horse.name}>
+                              {horse.name} (par {horse.userName})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Montant du pari</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="100"
+                          value={newGuestBet.amount}
+                          onChange={(e) => setNewGuestBet({ ...newGuestBet, amount: Number(e.target.value) })}
+                          className="form-input"
+                          required
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <button type="submit" className="btn btn-primary">
+                          🎯 Créer le pari
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Gestion des chevaux invités */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      🏇 Inscrire un cheval pour un invité
+                    </h2>
+                    <form onSubmit={createGuestHorse} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="form-label">Utilisateur invité</label>
+                        <select
+                          value={newGuestHorse.guestUserId}
+                          onChange={(e) => setNewGuestHorse({ ...newGuestHorse, guestUserId: e.target.value })}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Sélectionner un invité</option>
+                          {guestUsers.filter(gu => gu.isActive).map((guestUser) => (
+                            <option key={guestUser.userId} value={guestUser.userId}>
+                              {guestUser.name} - {guestUser.guestCode}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Course</label>
+                        <select
+                          value={newGuestHorse.raceId}
+                          onChange={(e) => setNewGuestHorse({ ...newGuestHorse, raceId: e.target.value })}
+                          className="form-select"
+                          required
+                        >
+                          <option value="">Sélectionner une course</option>
+                          {races.filter(race => !race.finished).map((race) => (
+                            <option key={race._id} value={race._id}>
+                              {race.name} ({race.horses?.length || 0}/{race.slots} slots)
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Nom du cheval</label>
+                        <input
+                          type="text"
+                          value={newGuestHorse.horseName}
+                          onChange={(e) => setNewGuestHorse({ ...newGuestHorse, horseName: e.target.value })}
+                          className="form-input"
+                          placeholder="Nom du cheval"
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="form-label">Numéro de slot (optionnel)</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="16"
+                          value={newGuestHorse.slotNumber || ''}
+                          onChange={(e) => setNewGuestHorse({ ...newGuestHorse, slotNumber: Number(e.target.value) })}
+                          className="form-input"
+                          placeholder="Auto si vide"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <button type="submit" className="btn btn-primary">
+                          🏇 Inscrire le cheval
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Liste des utilisateurs invités */}
+                  <div className="card">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                      📋 Gestion des utilisateurs invités
+                    </h2>
+                    
+                    {guestUsers.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="text-4xl mb-4">👤</div>
+                        <p className="text-gray-600">Aucun utilisateur invité créé</p>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Nom</th>
+                              <th>Code</th>
+                              <th>Points</th>
+                              <th>Paris</th>
+                              <th>Taux</th>
+                              <th>Statut</th>
+                              <th>Créé le</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {guestUsers.map((guestUser) => (
+                              <tr key={guestUser.userId}>
+                                <td>
+                                  <div className="font-medium text-gray-800">
+                                    {guestUser.name}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">
+                                    {guestUser.guestCode}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="font-bold text-green-600">
+                                    {guestUser.points} pts
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="text-sm">
+                                    <div>✅ {guestUser.wonBets}</div>
+                                    <div>❌ {guestUser.lostBets}</div>
+                                    <div>⏳ {guestUser.totalBets - guestUser.wonBets - guestUser.lostBets}</div>
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="font-medium">
+                                    {guestUser.winRate}%
+                                  </div>
+                                </td>
+                                <td>
+                                  {guestUser.isActive ? (
+                                    <span className="badge badge-success">Actif</span>
+                                  ) : (
+                                    <span className="badge badge-danger">Inactif</span>
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="text-sm text-gray-600">
+                                    {formatDate(guestUser.createdAt)}
+                                  </div>
+                                </td>
+                                <td>
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => toggleGuestUserStatus(guestUser.userId, guestUser.isActive)}
+                                      className={`text-xs px-2 py-1 rounded ${
+                                        guestUser.isActive 
+                                          ? 'bg-yellow-500 text-white' 
+                                          : 'bg-green-500 text-white'
+                                      }`}
+                                    >
+                                      {guestUser.isActive ? '⏸️' : '▶️'}
+                                    </button>
+                                    <button
+                                      onClick={() => deleteGuestUser(guestUser.userId, guestUser.name)}
+                                      className="btn-danger text-xs px-2 py-1 rounded"
+                                    >
+                                      🗑️
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Tab Réinitialisation */}
+              {activeTab === 'reset' && (
+                <div className="card">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">
+                    🗑️ Réinitialisation des données
+                  </h2>
+                  
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+                    <div className="flex items-start gap-3">
+                      <div className="text-red-500 text-2xl">⚠️</div>
+                      <div>
+                        <h3 className="text-lg font-bold text-red-800 mb-2">
+                          ATTENTION - Action irréversible
+                        </h3>
+                        <p className="text-red-700 mb-2">
+                          Cette action va supprimer TOUTES les données :
+                        </p>
+                        <ul className="text-red-700 text-sm space-y-1 ml-4">
+                          <li>• Tous les paris seront supprimés</li>
+                          <li>• Toutes les courses seront supprimées</li>
+                          <li>• Les points de tous les utilisateurs seront remis à 100</li>
+                          <li>• Les bonus Instagram seront réinitialisés</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <button
+                      onClick={resetAllData}
+                      className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                    >
+                      🗑️ Réinitialiser toutes les données
+                    </button>
+                  </div>
                 </div>
               )}
             </>

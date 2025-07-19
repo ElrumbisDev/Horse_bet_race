@@ -1,9 +1,89 @@
 'use client'
 
 import Link from 'next/link'
-import { SignedIn, SignedOut } from '@clerk/nextjs'
+import { useUser, SignedIn, SignedOut } from '@clerk/nextjs'
+import { useState, useEffect } from 'react'
+import PointsPopup from '@/components/PointsPopup'
+
+type Player = {
+  id: string
+  name: string
+  points: number
+  position: number
+}
 
 export default function HomePage() {
+  const { isSignedIn } = useUser()
+  const [topPlayers, setTopPlayers] = useState<Player[]>([])
+  const [showPointsPopup, setShowPointsPopup] = useState(false)
+  const [bonusPoints, setBonusPoints] = useState(0)
+  const [instagramBonusClaimed, setInstagramBonusClaimed] = useState(false)
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchTopPlayers()
+      checkInstagramBonusStatus()
+    }
+  }, [isSignedIn])
+
+  async function fetchTopPlayers() {
+    try {
+      const res = await fetch('/api/scores')
+      if (res.ok) {
+        const data = await res.json()
+        setTopPlayers(data.topPlayers)
+      }
+    } catch (error) {
+      console.error('Erreur récupération scores:', error)
+    }
+  }
+
+  async function checkInstagramBonusStatus() {
+    try {
+      const res = await fetch('/api/user')
+      if (res.ok) {
+        const data = await res.json()
+        setInstagramBonusClaimed(data.instagramBonusClaimed || false)
+      }
+    } catch (error) {
+      console.error('Erreur vérification bonus Instagram:', error)
+    }
+  }
+
+  async function handleInstagramClick(url: string) {
+    if (!isSignedIn) {
+      window.open(url, '_blank')
+      return
+    }
+
+    try {
+      const res = await fetch('/api/user/instagram-bonus', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (res.ok) {
+        const data = await res.json()
+        setBonusPoints(data.bonusPoints)
+        setShowPointsPopup(true)
+      } else {
+        const errorData = await res.json()
+        if (errorData.alreadyClaimed) {
+          // Utilisateur a déjà réclamé le bonus, ne pas montrer la popup
+          console.log('Bonus Instagram déjà réclamé')
+        } else {
+          console.error('Erreur API:', errorData.error)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur bonus Instagram:', error)
+    }
+    
+    // Ouvrir le lien Instagram après avoir donné les points
+    window.open(url, '_blank')
+  }
 
   return (
     <div className="min-h-screen">
@@ -103,12 +183,26 @@ export default function HomePage() {
                   Suivez nos comptes pour gagner des points bonus !
                 </p>
                 <div className="space-y-3">
-                  <a href="https://www.instagram.com/61_degres/" target="_blank" rel="noopener noreferrer" className="block glass rounded-lg px-4 py-3 text-sm font-medium hover:bg-white/20 transition-all">
-                    📸 @61_degres
-                  </a>
-                  <a href="https://www.instagram.com/hole_right_off/" target="_blank" rel="noopener noreferrer" className="block glass rounded-lg px-4 py-3 text-sm font-medium hover:bg-white/20 transition-all">
-                    📸 @hole_right_off
-                  </a>
+                  <button 
+                    onClick={() => handleInstagramClick('https://www.instagram.com/61_degres/')}
+                    className={`block w-full glass rounded-lg px-4 py-3 text-sm font-medium transition-all cursor-pointer ${
+                      instagramBonusClaimed 
+                        ? 'opacity-50 hover:bg-white/10' 
+                        : 'hover:bg-white/20'
+                    }`}
+                  >
+                    📸 @61_degres {instagramBonusClaimed && '✓'}
+                  </button>
+                  <button 
+                    onClick={() => handleInstagramClick('https://www.instagram.com/hole_right_off/')}
+                    className={`block w-full glass rounded-lg px-4 py-3 text-sm font-medium transition-all cursor-pointer ${
+                      instagramBonusClaimed 
+                        ? 'opacity-50 hover:bg-white/10' 
+                        : 'hover:bg-white/20'
+                    }`}
+                  >
+                    📸 @hole_right_off {instagramBonusClaimed && '✓'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -125,23 +219,23 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="card bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
               <div className="text-4xl mb-4">🎫</div>
-              <h3 className="font-bold text-xl mb-2">Festival 61 Degrés</h3>
-              <p className="text-gray-700 mb-4">Tickets pour le festival</p>
-              <div className="text-2xl font-bold text-yellow-600">2 places</div>
+              <h3 className="font-bold text-xl mb-2">Pass Art Sonic 2026</h3>
+              <p className="text-gray-700 mb-4">Pass 2 jours pour le festival</p>
+              <div className="text-2xl font-bold text-yellow-600">Pass 2 jours</div>
             </div>
 
             <div className="card bg-gradient-to-br from-blue-100 to-blue-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
               <div className="text-4xl mb-4">🎵</div>
-              <h3 className="font-bold text-xl mb-2">Accès Backstage</h3>
-              <p className="text-gray-700 mb-4">Backstage Artsonic</p>
-              <div className="text-2xl font-bold text-blue-600">VIP Pass</div>
+              <h3 className="font-bold text-xl mb-2">Festival 61 degrés</h3>
+              <p className="text-gray-700 mb-4">Places pour le festival</p>
+              <div className="text-2xl font-bold text-blue-600">Places</div>
             </div>
 
             <div className="card bg-gradient-to-br from-green-100 to-green-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <div className="text-4xl mb-4">🍾</div>
-              <h3 className="font-bold text-xl mb-2">Cidre Artisanal</h3>
-              <p className="text-gray-700 mb-4">Bouteille de cidre Bgnoles de Pom</p>
-              <div className="text-2xl font-bold text-green-600">1 bouteille</div>
+              <div className="text-4xl mb-4">🧢</div>
+              <h3 className="font-bold text-xl mb-2">Bobs Art Sonic</h3>
+              <p className="text-gray-700 mb-4">Pour crânes stratégiques</p>
+              <div className="text-2xl font-bold text-green-600">Bob exclusif</div>
             </div>
           </div>
 
@@ -152,6 +246,12 @@ export default function HomePage() {
           </div>
         </section>
       </SignedIn>
+      
+      <PointsPopup 
+        show={showPointsPopup} 
+        points={bonusPoints} 
+        onClose={() => setShowPointsPopup(false)} 
+      />
     </div>
   )
 }

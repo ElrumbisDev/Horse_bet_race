@@ -39,3 +39,4 @@ function getClientPromise(): Promise<MongoClient> {
 }
 
 export default getClientPromise
+export { getClientPromise as connectToDatabase }

@@ -11,12 +11,14 @@
   "dependencies": {
     "@clerk/nextjs": "^6.23.2",
     "@prisma/client": "^6.11.0",
+    "@types/uuid": "^10.0.0",
     "mongodb": "^6.17.0",
     "mongoose": "^8.16.1",
     "next": "15.3.4",
     "prisma": "^6.11.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
