@@ -218,7 +218,8 @@ export async function DELETE(request: Request) {
     }
 
     // Retirer le cheval de la course
-    await db.collection('courses').updateOne(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (db.collection('courses') as any).updateOne(
       { _id: new ObjectId(raceId) },
       { 
         $pull: { horses: { userId: guestUserId } },
