@@ -154,7 +154,7 @@ export default function AdminPage() {
                 type="submit"
                 className="w-full btn btn-primary"
               >
-                Accéder à l'admin
+                Accéder à l&apos;admin
               </button>
             </form>
           </div>
@@ -372,7 +372,7 @@ export default function AdminPage() {
   }
 
   const deleteGuestUser = async (guestUserId: string, guestName: string) => {
-    if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur invité "${guestName}" ?\nTous ses paris et chevaux seront également supprimés.`)) return
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer l&apos;utilisateur invité "${guestName}" ?\nTous ses paris et chevaux seront également supprimés.`)) return
 
     try {
       const response = await fetch('/api/admin/guest-users', {
@@ -801,7 +801,7 @@ export default function AdminPage() {
                     </h2>
                     <form onSubmit={createGuestUser} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="form-label">Nom de l'utilisateur</label>
+                        <label className="form-label">Nom de l&apos;utilisateur</label>
                         <input
                           type="text"
                           value={newGuestUser.name}
@@ -827,7 +827,7 @@ export default function AdminPage() {
                       
                       <div className="md:col-span-2">
                         <button type="submit" className="btn btn-primary">
-                          👤 Créer l'utilisateur invité
+                          👤 Créer l&apos;utilisateur invité
                         </button>
                       </div>
                     </form>
