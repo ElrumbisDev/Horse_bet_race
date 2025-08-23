@@ -103,7 +103,7 @@ export default function ScoresPage() {
               🏆 Classement des Joueurs
             </h1>
             <p className="text-gray-600 text-lg">
-              Découvrez qui domine le PMU Artsonic !
+              Découvrez qui domine le PMU 61 Degrés !
             </p>
           </div>
 

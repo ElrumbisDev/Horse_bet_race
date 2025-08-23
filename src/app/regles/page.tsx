@@ -16,7 +16,7 @@ export default function ReglesPage() {
               <div className="text-center">
                 <div className="text-4xl mb-4">📚</div>
                 <p className="text-gray-600 mb-6">
-                  Connecte-toi pour découvrir les règles du PMU Artsonic
+                  Connecte-toi pour découvrir les règles du PMU 61 Degrés
                 </p>
                 <Link href="/sign-in" className="btn btn-primary text-lg px-8 py-4">
                   Se connecter
@@ -32,7 +32,7 @@ export default function ReglesPage() {
           {/* Header */}
           <div className="text-center mb-12 animate-fadeIn">
             <h1 className="text-4xl font-bold text-gray-800 mb-4">
-              📚 Règles du PMU Artsonic
+              📚 Règles du PMU 61 Degrés
             </h1>
             <p className="text-gray-600 text-lg max-w-2xl mx-auto">
               Découvrez les règles des trois types de courses palpitantes qui vous attendent !
@@ -42,7 +42,7 @@ export default function ReglesPage() {
           {/* Introduction */}
           <div className="card bg-gradient-to-br from-yellow-50 to-orange-50 mb-12 text-center">
             <div className="text-4xl mb-4">🏇</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Bienvenue au PMU Artsonic !</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Bienvenue au PMU 61 Degrés !</h2>
             <p className="text-gray-700 text-lg mb-4">
               Participez aux courses les plus folles et pariez sur vos favoris !
             </p>

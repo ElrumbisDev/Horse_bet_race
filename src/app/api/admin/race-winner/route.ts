@@ -118,31 +118,58 @@ export async function PUT(request: Request) {
 
     // Si on retraite les paris, d'abord annuler les anciens résultats
     if (race.betsProcessed) {
-      // Annuler les anciens gains/pertes
-      const bets = await db.collection('bets').find({ 
+      // Annuler les anciens gains/pertes pour tous les types de paris
+      const regularBets = await db.collection('bets').find({ 
         raceId: raceId 
       }).toArray()
+      
+      const guestBets = await db.collection('guest-bets').find({ 
+        raceId: new ObjectId(raceId) 
+      }).toArray()
+      
+      const allBets = [...regularBets, ...guestBets]
 
-      for (const bet of bets) {
+      for (const bet of allBets) {
         if (bet.won === true) {
           // Retirer les gains de l'ancien gagnant
-          await db.collection('users').updateOne(
-            { userId: bet.userId },
-            { $inc: { points: -(bet.amount * bet.cote) } }
-          )
+          if (bet.guestUserId) {
+            await db.collection('users').updateOne(
+              { userId: bet.guestUserId, userType: 'guest' },
+              { $inc: { points: -(bet.amount * bet.cote) } }
+            )
+          } else {
+            await db.collection('users').updateOne(
+              { userId: bet.userId },
+              { $inc: { points: -(bet.amount * bet.cote) } }
+            )
+          }
         } else if (bet.won === false) {
           // Redonner les points perdus
-          await db.collection('users').updateOne(
-            { userId: bet.userId },
-            { $inc: { points: bet.amount } }
-          )
+          if (bet.guestUserId) {
+            await db.collection('users').updateOne(
+              { userId: bet.guestUserId, userType: 'guest' },
+              { $inc: { points: bet.amount } }
+            )
+          } else {
+            await db.collection('users').updateOne(
+              { userId: bet.userId },
+              { $inc: { points: bet.amount } }
+            )
+          }
         }
 
         // Réinitialiser le statut du pari
-        await db.collection('bets').updateOne(
-          { _id: bet._id },
-          { $unset: { won: "", winnings: "" } }
-        )
+        if (bet.guestUserId) {
+          await db.collection('guest-bets').updateOne(
+            { _id: bet._id },
+            { $unset: { won: "", winnings: "" } }
+          )
+        } else {
+          await db.collection('bets').updateOne(
+            { _id: bet._id },
+            { $unset: { won: "", winnings: "" } }
+          )
+        }
       }
     }
 
@@ -215,40 +242,76 @@ export async function PATCH(request: Request) {
       }, { status: 400 })
     }
 
-    // Traiter tous les paris de cette course (les paris stockent raceId comme string)
-    const bets = await db.collection('bets').find({ 
+    // Traiter tous les paris de cette course (réguliers + invités)
+    const regularBets = await db.collection('bets').find({ 
       raceId: raceId 
     }).toArray()
     
-    console.log(`Found ${bets.length} bets for race ${raceId} in admin processing`)
+    const guestBets = await db.collection('guest-bets').find({ 
+      raceId: new ObjectId(raceId) 
+    }).toArray()
+    
+    const allBets = [...regularBets, ...guestBets]
+    
+    console.log(`Found ${regularBets.length} regular bets and ${guestBets.length} guest bets for race ${raceId} in admin processing`)
 
     let totalWinners = 0
     let totalLosers = 0
     let totalWinnings = 0
 
-    for (const bet of bets) {
+    for (const bet of allBets) {
       const won = bet.horseName === race.winner
-      const winnings = won ? bet.amount * bet.cote : 0
+      const winnings = won ? bet.amount * (bet.cote || 2) : 0
+      
+      console.log(`Processing bet: ${bet.horseName} vs winner ${race.winner}, won: ${won}, winnings: ${winnings}`)
 
-      // Mettre à jour le pari
-      await db.collection('bets').updateOne(
-        { _id: bet._id },
-        { 
-          $set: { 
-            finished: true,
-            won: won,
-            winner: race.winner,
-            ...(won && { winnings: winnings })
+      // Mettre à jour le pari selon son type
+      if (bet.guestUserId) {
+        // Pari d'utilisateur invité
+        await db.collection('guest-bets').updateOne(
+          { _id: bet._id },
+          { 
+            $set: { 
+              finished: true,
+              won: won,
+              winner: race.winner,
+              ...(won && { winnings: winnings })
+            }
           }
-        }
-      )
+        )
+      } else {
+        // Pari d'utilisateur régulier
+        await db.collection('bets').updateOne(
+          { _id: bet._id },
+          { 
+            $set: { 
+              finished: true,
+              won: won,
+              winner: race.winner,
+              ...(won && { winnings: winnings })
+            }
+          }
+        )
+      }
 
       // Mettre à jour les points de l'utilisateur (seulement pour les gagnants)
       if (won) {
-        await db.collection('users').updateOne(
-          { userId: bet.userId },
-          { $inc: { points: winnings } }
-        )
+        let updateResult
+        if (bet.guestUserId) {
+          // Utilisateur invité
+          updateResult = await db.collection('users').updateOne(
+            { userId: bet.guestUserId, userType: 'guest' },
+            { $inc: { points: winnings } }
+          )
+          console.log(`Guest user ${bet.guestUserId} awarded ${winnings} points, success: ${updateResult.modifiedCount > 0}`)
+        } else {
+          // Utilisateur régulier
+          updateResult = await db.collection('users').updateOne(
+            { userId: bet.userId },
+            { $inc: { points: winnings } }
+          )
+          console.log(`Regular user ${bet.userId} awarded ${winnings} points, success: ${updateResult.modifiedCount > 0}`)
+        }
         totalWinners++
         totalWinnings += winnings
       } else {
@@ -274,7 +337,9 @@ export async function PATCH(request: Request) {
       results: {
         race: race.name,
         winner: race.winner,
-        totalBets: bets.length,
+        totalBets: allBets.length,
+        regularBets: regularBets.length,
+        guestBets: guestBets.length,
         winners: totalWinners,
         losers: totalLosers,
         totalWinnings: totalWinnings
