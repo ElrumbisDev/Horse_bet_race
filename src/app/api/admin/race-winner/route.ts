@@ -118,6 +118,18 @@ export async function PUT(request: Request) {
 
     // Si on retraite les paris, d'abord annuler les anciens résultats
     if (race.betsProcessed) {
+      // Annuler les points bonus de l'ancien propriétaire gagnant
+      const oldWinningHorse = race.horses?.find((h: { name: string; userId?: string; userName?: string }) => h.name === oldWinner)
+      if (oldWinningHorse && oldWinningHorse.userId) {
+        const bonusPoints = 50 // Même montant que celui accordé
+        console.log(`Removing ${bonusPoints} bonus points from old horse owner ${oldWinningHorse.userId} for old winner ${oldWinner}`)
+        
+        await db.collection('users').updateOne(
+          { userId: oldWinningHorse.userId },
+          { $inc: { points: -bonusPoints } }
+        )
+      }
+
       // Annuler les anciens gains/pertes pour tous les types de paris
       const regularBets = await db.collection('bets').find({ 
         raceId: raceId 
@@ -171,6 +183,18 @@ export async function PUT(request: Request) {
           )
         }
       }
+    }
+
+    // Donner les points bonus au nouveau propriétaire gagnant
+    const newWinningHorse = race.horses?.find((h: { name: string; userId?: string; userName?: string }) => h.name === newWinnerHorseName)
+    if (newWinningHorse && newWinningHorse.userId) {
+      const bonusPoints = 50 // Points bonus pour le propriétaire du cheval gagnant
+      console.log(`Awarding ${bonusPoints} bonus points to new horse owner ${newWinningHorse.userId} for new winner ${newWinnerHorseName}`)
+      
+      await db.collection('users').updateOne(
+        { userId: newWinningHorse.userId },
+        { $inc: { points: bonusPoints } }
+      )
     }
 
     // Mettre à jour le gagnant
@@ -240,6 +264,20 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ 
         error: 'Les paris de cette course ont déjà été traités' 
       }, { status: 400 })
+    }
+
+    // Donner des points bonus au propriétaire du cheval gagnant
+    const winningHorse = race.horses?.find((h: { name: string; userId?: string; userName?: string }) => h.name === race.winner)
+    if (winningHorse && winningHorse.userId) {
+      const bonusPoints = 50 // Points bonus pour le propriétaire du cheval gagnant
+      console.log(`Awarding ${bonusPoints} bonus points to horse owner ${winningHorse.userId} for winning horse ${race.winner}`)
+      
+      const ownerUpdateResult = await db.collection('users').updateOne(
+        { userId: winningHorse.userId },
+        { $inc: { points: bonusPoints } }
+      )
+      
+      console.log(`Owner bonus points update result for ${winningHorse.userId}:`, ownerUpdateResult.modifiedCount > 0 ? 'SUCCESS' : 'FAILED')
     }
 
     // Traiter tous les paris de cette course (réguliers + invités)

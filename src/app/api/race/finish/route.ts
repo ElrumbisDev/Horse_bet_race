@@ -71,6 +71,20 @@ export async function POST(request: NextRequest) {
       console.log(`Update result for ${bet.userId || bet.guestUserId}:`, updateResult.modifiedCount > 0 ? 'SUCCESS' : 'FAILED')
     }
 
+    // Donner des points bonus au propriétaire du cheval gagnant
+    const winningHorse = race.horses?.find((horse: { name: string; userId?: string; userName?: string }) => horse.name === winnerHorseName)
+    if (winningHorse && winningHorse.userId) {
+      const bonusPoints = 50 // Points bonus pour le propriétaire du cheval gagnant
+      console.log(`Awarding ${bonusPoints} bonus points to horse owner ${winningHorse.userId} for winning horse ${winnerHorseName}`)
+      
+      const ownerUpdateResult = await usersCollection.updateOne(
+        { userId: winningHorse.userId },
+        { $inc: { points: bonusPoints } }
+      )
+      
+      console.log(`Owner bonus points update result for ${winningHorse.userId}:`, ownerUpdateResult.modifiedCount > 0 ? 'SUCCESS' : 'FAILED')
+    }
+
     // Marquer la course comme terminée
     await db.collection('courses').updateOne(
       { _id: new ObjectId(raceId) },
