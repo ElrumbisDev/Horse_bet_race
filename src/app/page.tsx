@@ -196,25 +196,25 @@ export default function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="card bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <div className="text-4xl mb-4">🎫</div>
-              <h3 className="font-bold text-xl mb-2">Pass Art Sonic 2026</h3>
-              <p className="text-gray-700 mb-4">Pass 2 jours pour le festival</p>
-              <div className="text-2xl font-bold text-yellow-600">Pass 2 jours</div>
-            </div>
-
             <div className="card bg-gradient-to-br from-blue-100 to-blue-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <div className="text-4xl mb-4">🎵</div>
-              <h3 className="font-bold text-xl mb-2">Festival 61 degrés</h3>
-              <p className="text-gray-700 mb-4">Places pour le festival</p>
-              <div className="text-2xl font-bold text-blue-600">Places</div>
+              <div className="text-4xl mb-4">🏛️</div>
+              <h3 className="font-bold text-xl mb-2">Parcours ressourçant aux thermes</h3>
+              <p className="text-gray-700 mb-4">Expérience bien-être complète</p>
+              <div className="text-2xl font-bold text-blue-600">1er prix</div>
             </div>
 
-            <div className="card bg-gradient-to-br from-green-100 to-green-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
-              <div className="text-4xl mb-4">🧢</div>
-              <h3 className="font-bold text-xl mb-2">Bobs Art Sonic</h3>
-              <p className="text-gray-700 mb-4">Pour crânes stratégiques</p>
-              <div className="text-2xl font-bold text-green-600">Bob exclusif</div>
+            <div className="card bg-gradient-to-br from-purple-100 to-purple-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <div className="text-4xl mb-4">🧘‍♀️</div>
+              <h3 className="font-bold text-xl mb-2">Spa du Roc au Chien</h3>
+              <p className="text-gray-700 mb-4">Séance privative pour deux</p>
+              <div className="text-2xl font-bold text-purple-600">2e prix</div>
+            </div>
+
+            <div className="card bg-gradient-to-br from-yellow-100 to-yellow-200 p-6 text-center cursor-pointer hover:scale-105 transition-transform">
+              <div className="text-4xl mb-4">🎪</div>
+              <h3 className="font-bold text-xl mb-2">Pass Trofest</h3>
+              <p className="text-gray-700 mb-4">Pass deux jours complet</p>
+              <div className="text-2xl font-bold text-yellow-600">3e prix</div>
             </div>
           </div>
 
