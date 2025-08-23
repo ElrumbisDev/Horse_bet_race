@@ -186,13 +186,13 @@ export async function PUT(request: Request) {
     }
 
     // Donner les points bonus au nouveau propriétaire gagnant
-    const newWinningHorse = race.horses?.find((h: { name: string; userId?: string; userName?: string }) => h.name === newWinnerHorseName)
-    if (newWinningHorse && newWinningHorse.userId) {
+    const newWinnerHorse = race.horses?.find((h: { name: string; userId?: string; userName?: string }) => h.name === newWinnerHorseName)
+    if (newWinnerHorse && newWinnerHorse.userId) {
       const bonusPoints = 50 // Points bonus pour le propriétaire du cheval gagnant
-      console.log(`Awarding ${bonusPoints} bonus points to new horse owner ${newWinningHorse.userId} for new winner ${newWinnerHorseName}`)
+      console.log(`Awarding ${bonusPoints} bonus points to new horse owner ${newWinnerHorse.userId} for new winner ${newWinnerHorseName}`)
       
       await db.collection('users').updateOne(
-        { userId: newWinningHorse.userId },
+        { userId: newWinnerHorse.userId },
         { $inc: { points: bonusPoints } }
       )
     }
